@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Typhi Solution — Professional Cleaning Services</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --green:#1e6b1e; --green-light:#28a028; --green-dark:#0f3d0f; --green-pale:#e8f5e8;
+  --gold:#c9a84c; --black:#0d0d0d; --dark:#1a1a1a; --charcoal:#2c2c2c;
+  --gray:#f7f7f5; --gray2:#ebebeb; --text:#2c2c2c; --white:#fff;
+  --red:#b83232; --orange:#d47a1e; --blue:#1e5c8a;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--white);overflow-x:hidden;}
+
+/* ═══ PAGES ═══════════════════════════════════════════════ */
+.page{display:none;}
+.page.active{display:block;}
+.app-page{display:none;min-height:100vh;flex-direction:column;}
+.app-page.active{display:flex;}
+
+/* ═══ PUBLIC NAVBAR ════════════════════════════════════════ */
+.pub-nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:0 5%;height:70px;display:flex;align-items:center;justify-content:space-between;transition:all .3s;}
+.pub-nav.scrolled{background:rgba(10,10,10,.96);backdrop-filter:blur(10px);box-shadow:0 2px 20px rgba(0,0,0,.3);}
+.nav-logo{font-family:'Playfair Display',serif;font-size:22px;color:var(--white);letter-spacing:.5px;}
+.nav-logo span{color:var(--gold);}
+.nav-links{display:flex;align-items:center;gap:32px;}
+.nav-links a{color:rgba(255,255,255,.8);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s;cursor:pointer;}
+.nav-links a:hover{color:var(--white);}
+.nav-cta{background:var(--green);color:var(--white)!important;padding:9px 22px;border-radius:6px;font-weight:600!important;}
+.nav-cta:hover{background:var(--green-light)!important;}
+.nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;}
+.nav-hamburger span{width:24px;height:2px;background:#fff;border-radius:2px;transition:all .3s;}
+
+/* ═══ HERO ════════════════════════════════════════════════ */
+.hero{min-height:100vh;background:linear-gradient(160deg,#0a1f0a 0%,#0f300f 40%,#162816 100%);position:relative;display:flex;align-items:center;overflow:hidden;}
+.hero-pattern{position:absolute;inset:0;opacity:.04;background-image:repeating-linear-gradient(45deg,#fff 0,#fff 1px,transparent 0,transparent 50%);background-size:30px 30px;}
+.hero-glow{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(40,160,40,.15) 0%,transparent 70%);top:-100px;right:-100px;}
+.hero-content{position:relative;z-index:2;padding:0 5%;max-width:760px;}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold);padding:6px 16px;border-radius:30px;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:28px;animation:fadeUp .8s ease both;}
+.hero-title{font-family:'Playfair Display',serif;font-size:clamp(42px,6vw,80px);color:var(--white);line-height:1.1;margin-bottom:24px;animation:fadeUp .8s .1s ease both;}
+.hero-title em{color:var(--gold);font-style:normal;}
+.hero-sub{font-size:18px;color:rgba(255,255,255,.65);line-height:1.7;max-width:520px;margin-bottom:40px;font-weight:300;animation:fadeUp .8s .2s ease both;}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;animation:fadeUp .8s .3s ease both;}
+.btn-hero-primary{background:var(--green);color:#fff;padding:14px 32px;border-radius:7px;font-size:15px;font-weight:600;text-decoration:none;cursor:pointer;border:none;transition:all .25s;font-family:'DM Sans',sans-serif;}
+.btn-hero-primary:hover{background:var(--green-light);transform:translateY(-2px);box-shadow:0 8px 24px rgba(40,160,40,.35);}
+.btn-hero-outline{background:transparent;color:#fff;padding:14px 32px;border-radius:7px;font-size:15px;font-weight:600;border:1.5px solid rgba(255,255,255,.3);cursor:pointer;transition:all .25s;font-family:'DM Sans',sans-serif;}
+.btn-hero-outline:hover{border-color:rgba(255,255,255,.7);background:rgba(255,255,255,.05);}
+.hero-stats{display:flex;gap:40px;margin-top:60px;animation:fadeUp .8s .4s ease both;}
+.hero-stat .num{font-family:'Playfair Display',serif;font-size:32px;color:var(--gold);}
+.hero-stat .lbl{font-size:12px;color:rgba(255,255,255,.5);margin-top:2px;letter-spacing:.5px;}
+.hero-scroll{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:rgba(255,255,255,.3);font-size:11px;letter-spacing:1px;animation:bounce 2s infinite;}
+.scroll-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.3);}
+
+/* ═══ SECTIONS ════════════════════════════════════════════ */
+.section{padding:90px 5%;}
+.section-label{font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--green);margin-bottom:10px;}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(32px,4vw,50px);color:var(--black);line-height:1.2;margin-bottom:16px;}
+.section-sub{font-size:16px;color:#777;max-width:500px;line-height:1.7;}
+.section-head{margin-bottom:56px;}
+
+/* ═══ SERVICES ════════════════════════════════════════════ */
+.services-section{background:var(--gray);}
+.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;}
+.service-card{background:var(--white);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .3s;border:1.5px solid transparent;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.service-card:hover{transform:translateY(-6px);border-color:var(--green);box-shadow:0 16px 40px rgba(30,107,30,.15);}
+.service-img{height:200px;display:flex;align-items:center;justify-content:center;font-size:56px;position:relative;overflow:hidden;}
+.service-img::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 60%,rgba(0,0,0,.1) 100%);}
+.s1{background:linear-gradient(135deg,#e8f5e8,#c8e6c8);}
+.s2{background:linear-gradient(135deg,#e3f2fd,#bbdefb);}
+.s3{background:linear-gradient(135deg,#fff8e1,#ffecb3);}
+.s4{background:linear-gradient(135deg,#fce4ec,#f8bbd0);}
+.s5{background:linear-gradient(135deg,#e8eaf6,#c5cae9);}
+.s6{background:linear-gradient(135deg,#e0f7fa,#b2ebf2);}
+.s7{background:linear-gradient(135deg,#f1f8e9,#dcedc8);}
+.service-body{padding:22px;}
+.service-name{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--black);margin-bottom:8px;}
+.service-desc{font-size:13px;color:#777;line-height:1.6;margin-bottom:16px;}
+.service-features{list-style:none;margin-bottom:18px;}
+.service-features li{font-size:12px;color:#555;padding:3px 0;display:flex;align-items:center;gap:7px;}
+.service-features li::before{content:'✓';color:var(--green);font-weight:700;font-size:11px;}
+.btn-book-service{width:100%;padding:11px;background:var(--green-dark);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.btn-book-service:hover{background:var(--green);}
+
+/* ═══ WHY US ══════════════════════════════════════════════ */
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+.why-img-side{background:linear-gradient(135deg,var(--green-dark),var(--green));border-radius:20px;height:480px;display:flex;align-items:center;justify-content:center;font-size:80px;position:relative;overflow:hidden;}
+.why-img-side::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
+.why-points{display:flex;flex-direction:column;gap:28px;}
+.why-point{display:flex;gap:18px;align-items:flex-start;}
+.why-icon{width:46px;height:46px;border-radius:10px;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.why-point h4{font-size:15px;font-weight:600;color:var(--black);margin-bottom:4px;}
+.why-point p{font-size:13px;color:#777;line-height:1.6;}
+
+/* ═══ PROCESS ═════════════════════════════════════════════ */
+.process-section{background:var(--black);color:#fff;}
+.process-section .section-title{color:#fff;}
+.process-section .section-label{color:var(--gold);}
+.process-section .section-sub{color:rgba(255,255,255,.5);}
+.process-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;}
+.process-step{padding:32px 24px;position:relative;border-right:1px solid rgba(255,255,255,.07);}
+.process-step:last-child{border-right:none;}
+.step-num{font-family:'Playfair Display',serif;font-size:56px;color:rgba(255,255,255,.06);font-weight:900;line-height:1;margin-bottom:16px;}
+.step-icon{font-size:28px;margin-bottom:12px;}
+.step-title{font-size:15px;font-weight:600;color:#fff;margin-bottom:8px;}
+.step-desc{font-size:13px;color:rgba(255,255,255,.45);line-height:1.6;}
+
+/* ═══ LOGIN SECTION ═══════════════════════════════════════ */
+.login-section{background:linear-gradient(135deg,var(--green-dark) 0%,#0d2b0d 100%);padding:90px 5%;}
+.login-wrap{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;max-width:1100px;margin:0 auto;}
+.login-left h2{font-family:'Playfair Display',serif;font-size:clamp(28px,3.5vw,44px);color:#fff;line-height:1.2;margin-bottom:16px;}
+.login-left p{font-size:15px;color:rgba(255,255,255,.6);line-height:1.7;margin-bottom:32px;}
+.login-perks{display:flex;flex-direction:column;gap:14px;}
+.login-perk{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.75);font-size:14px;}
+.login-perk-icon{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.login-box{background:#fff;border-radius:16px;padding:40px 36px;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.login-tabs{display:flex;background:#f5f5f5;border-radius:8px;padding:3px;margin-bottom:28px;}
+.login-tab{flex:1;padding:9px;text-align:center;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;color:#999;}
+.login-tab.active{background:#fff;color:var(--black);box-shadow:0 1px 4px rgba(0,0,0,.1);}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:11px;font-weight:700;color:#666;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;}
+.form-group input{width:100%;padding:11px 13px;border:1.5px solid #e8e8e8;border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s;}
+.form-group input:focus{border-color:var(--green);}
+.btn-login{width:100%;padding:13px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;margin-top:4px;}
+.btn-login:hover{background:var(--green-dark);}
+.btn-login:disabled{background:#bbb;cursor:not-allowed;}
+.auth-msg{padding:10px 13px;border-radius:7px;font-size:13px;margin-bottom:12px;display:none;}
+.auth-msg.error{background:#fdeaea;color:var(--red);border:1px solid #f5c6c6;display:block;}
+.auth-msg.success{background:#eafde8;color:var(--green-dark);border:1px solid #c6f0c6;display:block;}
+
+/* ═══ FOOTER ══════════════════════════════════════════════ */
+footer{background:var(--black);color:rgba(255,255,255,.5);padding:40px 5%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+footer .logo{font-family:'Playfair Display',serif;font-size:18px;color:#fff;}
+footer .logo span{color:var(--gold);}
+footer p{font-size:13px;}
+.footer-links{display:flex;gap:24px;}
+.footer-links a{color:rgba(255,255,255,.4);text-decoration:none;font-size:13px;cursor:pointer;transition:color .2s;}
+.footer-links a:hover{color:rgba(255,255,255,.8);}
+
+/* ═══ APP NAVBAR ══════════════════════════════════════════ */
+.app-nav{background:var(--black);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.app-nav-brand{font-family:'Playfair Display',serif;font-size:19px;color:#fff;}
+.app-nav-brand span{color:var(--gold);}
+.app-nav-right{display:flex;align-items:center;gap:14px;}
+.role-pill{padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.role-pill.admin{background:#7d3c98;color:#fff;}
+.role-pill.staff{background:var(--blue);color:#fff;}
+.role-pill.client{background:var(--green);color:#fff;}
+.nav-username{color:#ccc;font-size:13px;}
+.btn-signout{background:transparent;border:1px solid #444;color:#aaa;padding:5px 13px;border-radius:6px;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.btn-signout:hover{border-color:var(--red);color:var(--red);}
+
+/* ═══ APP LAYOUT ══════════════════════════════════════════ */
+.app-body{display:flex;flex:1;}
+.sidebar{width:230px;background:var(--dark);min-height:calc(100vh - 60px);padding:12px 0;flex-shrink:0;}
+.sidebar-section{padding:12px 18px 4px;font-size:10px;font-weight:700;color:#444;text-transform:uppercase;letter-spacing:1px;}
+.sidebar-nav{list-style:none;}
+.sidebar-nav li a{display:flex;align-items:center;gap:10px;padding:10px 18px;color:#888;text-decoration:none;font-size:13px;transition:all .2s;cursor:pointer;border-left:3px solid transparent;}
+.sidebar-nav li a:hover{background:rgba(30,107,30,.15);color:#ccc;}
+.sidebar-nav li a.active{background:rgba(30,107,30,.2);color:#5dba5d;border-left-color:#5dba5d;}
+.sidebar-nav li a .icon{font-size:15px;width:18px;flex-shrink:0;}
+.main-content{flex:1;padding:28px;overflow-y:auto;background:#f5f5f3;}
+
+/* ═══ PANELS ══════════════════════════════════════════════ */
+.panel{display:none;}
+.panel.active{display:block;}
+.panel-title{font-family:'Playfair Display',serif;font-size:28px;color:var(--black);margin-bottom:4px;}
+.panel-sub{font-size:13px;color:#999;margin-bottom:22px;}
+
+/* ═══ ROLE BANNER ═════════════════════════════════════════ */
+.role-banner{border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;font-size:13px;}
+.role-banner.admin{background:linear-gradient(135deg,#f5eef8,#e8d5f5);border:1px solid #d2b4e8;color:#5b2c8d;}
+.role-banner.staff{background:linear-gradient(135deg,#e8f4fd,#d1ecf1);border:1px solid #bee3f8;color:#1a5276;}
+.role-banner.client{background:linear-gradient(135deg,#eafde8,#d4edda);border:1px solid #c6f0c6;color:#1a4d1a;}
+
+/* ═══ STATS ═══════════════════════════════════════════════ */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:22px;}
+.stat-card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.05);border-top:3px solid #e8e8e8;}
+.stat-card.green{border-top-color:var(--green);}
+.stat-card.orange{border-top-color:var(--orange);}
+.stat-card.blue{border-top-color:var(--blue);}
+.stat-card.purple{border-top-color:#8e44ad;}
+.stat-number{font-size:30px;font-weight:700;color:var(--black);font-family:'Playfair Display',serif;}
+.stat-label{font-size:11px;color:#999;margin-top:3px;text-transform:uppercase;letter-spacing:.5px;}
+
+/* ═══ TABLES ══════════════════════════════════════════════ */
+.table-card{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.05);overflow:hidden;margin-bottom:20px;}
+.table-header{padding:14px 18px;border-bottom:1px solid #ebebeb;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.table-header h3{font-size:14px;font-weight:600;}
+table{width:100%;border-collapse:collapse;}
+th{background:#f7f7f5;padding:9px 14px;text-align:left;font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;}
+td{padding:11px 14px;border-bottom:1px solid #f0f0f0;font-size:13px;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#fafaf8;}
+
+/* ═══ BADGES ══════════════════════════════════════════════ */
+.badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;text-transform:capitalize;}
+.badge-pending{background:#fff3cd;color:#856404;}
+.badge-active{background:#d1ecf1;color:#0c5460;}
+.badge-completed{background:#d4edda;color:#155724;}
+.badge-cancelled{background:#f8d7da;color:#721c24;}
+.badge-admin{background:#e8d5f5;color:#5b2c8d;}
+.badge-staff{background:#d1ecf1;color:#0c5460;}
+.badge-client{background:#d4edda;color:#155724;}
+
+/* ═══ BUTTONS (app) ═══════════════════════════════════════ */
+.btn-sm{padding:5px 11px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.btn-sm:hover{opacity:.85;}
+.btn-approve{background:var(--green);color:#fff;}
+.btn-reject{background:var(--red);color:#fff;}
+.btn-assign{background:var(--blue);color:#fff;}
+.btn-complete{background:var(--green);color:#fff;}
+.btn-role{background:#8e44ad;color:#fff;}
+.btn-demote{background:var(--orange);color:#fff;}
+
+/* ═══ FORM CARD ═══════════════════════════════════════════ */
+.form-card{background:#fff;border-radius:12px;padding:26px;box-shadow:0 2px 8px rgba(0,0,0,.05);max-width:580px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fgrp{margin-bottom:14px;}
+.fgrp label{display:block;font-size:11px;font-weight:700;color:#666;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;}
+.fgrp input,.fgrp select,.fgrp textarea{width:100%;padding:11px 13px;border:1.5px solid #e8e8e8;border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s;background:#fff;}
+.fgrp input:focus,.fgrp select:focus,.fgrp textarea:focus{border-color:var(--green);}
+.fgrp textarea{resize:vertical;min-height:80px;}
+.btn-submit{background:var(--green);color:#fff;border:none;padding:12px 26px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.btn-submit:hover{background:var(--green-dark);}
+.btn-submit:disabled{background:#bbb;cursor:not-allowed;}
+
+/* ═══ BOOKING CARD ════════════════════════════════════════ */
+.booking-card{background:#fff;border-radius:12px;padding:18px 20px;box-shadow:0 2px 8px rgba(0,0,0,.05);margin-bottom:14px;border-left:4px solid #e8e8e8;}
+.booking-card.pending{border-left-color:var(--orange);}
+.booking-card.active{border-left-color:var(--blue);}
+.booking-card.completed{border-left-color:var(--green);}
+.booking-card.cancelled{border-left-color:var(--red);}
+
+/* ═══ TRACKER ═════════════════════════════════════════════ */
+.tracker{display:flex;align-items:flex-start;margin:14px 0 4px;position:relative;}
+.tracker::before{content:'';position:absolute;top:13px;left:13px;right:13px;height:2px;background:#ebebeb;z-index:0;}
+.t-step{flex:1;text-align:center;position:relative;z-index:1;}
+.t-dot{width:26px;height:26px;border-radius:50%;background:#ebebeb;border:2px solid #ddd;margin:0 auto 5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#aaa;}
+.t-step.done .t-dot{background:var(--green);border-color:var(--green);color:#fff;}
+.t-step.current .t-dot{background:var(--orange);border-color:var(--orange);color:#fff;}
+.t-step.cancelled .t-dot{background:var(--red);border-color:var(--red);color:#fff;}
+.t-label{font-size:10px;color:#bbb;}
+.t-step.done .t-label,.t-step.current .t-label{color:var(--text);font-weight:600;}
+
+/* ═══ PERMISSIONS ═════════════════════════════════════════ */
+.perm-card{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.05);overflow:hidden;}
+.perm-header{padding:14px 18px;font-size:14px;font-weight:700;}
+.perm-header.admin{background:#f5eef8;color:#5b2c8d;}
+.perm-header.staff{background:#e8f4fd;color:#1a5276;}
+.perm-header.client{background:#eafde8;color:#1a4d1a;}
+.perm-item{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #f5f5f5;font-size:13px;}
+.perm-item:last-child{border-bottom:none;}
+.perm-yes{color:var(--green);}
+.perm-no{color:#ccc;text-decoration:line-through;}
+
+/* ═══ MODAL ═══════════════════════════════════════════════ */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center;}
+.modal-overlay.active{display:flex;}
+.modal{background:#fff;border-radius:12px;padding:26px;width:90%;max-width:400px;}
+.modal h3{font-size:17px;font-weight:600;margin-bottom:12px;}
+.modal-actions{display:flex;gap:10px;margin-top:16px;justify-content:flex-end;}
+.btn-cancel-m{background:#f0f0f0;color:var(--text);border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;}
+
+/* ═══ MISC ════════════════════════════════════════════════ */
+.msg-box{padding:10px 13px;border-radius:7px;font-size:13px;margin-bottom:14px;display:none;}
+.msg-box.error{background:#fdeaea;color:var(--red);border:1px solid #f5c6c6;display:block;}
+.msg-box.success{background:#eafde8;color:var(--green-dark);border:1px solid #c6f0c6;display:block;}
+.empty{text-align:center;padding:44px 20px;color:#bbb;}
+.empty-icon{font-size:36px;margin-bottom:10px;}
+.loading{text-align:center;padding:28px;color:#aaa;font-size:13px;}
+.search-bar{padding:7px 12px;border:1.5px solid #e8e8e8;border-radius:7px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;width:180px;}
+.search-bar:focus{border-color:var(--green);}
+.notif-item{padding:12px 16px;border-bottom:1px solid #f0f0f0;font-size:13px;}
+.notif-item.unread{background:#f0f8f0;border-left:3px solid var(--green);}
+.notif-time{font-size:11px;color:#bbb;margin-top:3px;}
+.bar-wrap{margin-bottom:14px;}
+.bar-label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;}
+.bar-track{height:10px;background:#ebebeb;border-radius:10px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:10px;transition:width .5s;}
+
+/* ═══ ANIMATIONS ══════════════════════════════════════════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(8px);}}
+
+/* ═══ RESPONSIVE ══════════════════════════════════════════ */
+@media(max-width:900px){
+  .why-grid{grid-template-columns:1fr;}
+  .why-img-side{height:260px;}
+  .login-wrap{grid-template-columns:1fr;}
+  .login-left{display:none;}
+}
+@media(max-width:768px){
+  .sidebar{display:none;}
+  .form-row{grid-template-columns:1fr;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .process-grid{grid-template-columns:1fr 1fr;}
+  .nav-links{display:none;}
+  .nav-hamburger{display:flex;}
+  .hero-stats{gap:24px;}
+  footer{flex-direction:column;text-align:center;}
+}
+@media(max-width:480px){
+  .services-grid{grid-template-columns:1fr;}
+  .process-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════
+     PUBLIC WEBSITE
+════════════════════════════════════════════════════════════ -->
+<div class="page active" id="publicPage">
+
+  <!-- NAVBAR -->
+  <nav class="pub-nav" id="pubNav">
+    <div class="nav-logo">Typhi <span>Solution</span></div>
+    <div class="nav-links">
+      <a onclick="scrollTo('services')">Services</a>
+      <a onclick="scrollTo('why')">Why Us</a>
+      <a onclick="scrollTo('process')">How It Works</a>
+      <a onclick="scrollTo('loginSection')" class="nav-cta">Login / Register</a>
+    </div>
+    <div class="nav-hamburger" onclick="scrollTo('loginSection')">
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-pattern"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-content">
+      <div class="hero-tag">✦ Nairobi's Trusted Cleaners</div>
+      <h1 class="hero-title">Spotless Spaces,<br><em>Effortless Living.</em></h1>
+      <p class="hero-sub">Professional cleaning services for homes, offices, institutions and events across Nairobi. Reliable staff, guaranteed results.</p>
+      <div class="hero-btns">
+        <button class="btn-hero-primary" onclick="scrollTo('services')">Explore Services</button>
+        <button class="btn-hero-outline" onclick="scrollTo('loginSection')">Book Now</button>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="num">500+</div><div class="lbl">Happy Clients</div></div>
+        <div class="hero-stat"><div class="num">7</div><div class="lbl">Service Types</div></div>
+        <div class="hero-stat"><div class="num">100%</div><div class="lbl">Satisfaction</div></div>
+      </div>
+    </div>
+    <div class="hero-scroll">↓ SCROLL <div class="scroll-dot"></div></div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="section services-section" id="services">
+    <div class="section-head">
+      <div class="section-label">Our Services</div>
+      <h2 class="section-title">Everything Clean,<br>Done Right.</h2>
+      <p class="section-sub">From a single room to an entire institution — we have the expertise and team to handle it all.</p>
+    </div>
+    <div class="services-grid">
+
+      <div class="service-card" onclick="bookService('Residential Cleaning')">
+        <div class="service-img s1">🏠</div>
+        <div class="service-body">
+          <div class="service-name">Residential Cleaning</div>
+          <div class="service-desc">Professional home cleaning tailored to your schedule. We make your living space spotless and fresh.</div>
+          <ul class="service-features">
+            <li>Full house deep clean</li>
+            <li>Kitchen & bathroom sanitisation</li>
+            <li>Bedroom & living area polish</li>
+            <li>Flexible scheduling</li>
+          </ul>
+          <button class="btn-book-service">Book This Service →</button>
+        </div>
+      </div>
+
+      <div class="service-card" onclick="bookService('Office & Commercial Cleaning')">
+        <div class="service-img s2">🏢</div>
+        <div class="service-body">
+          <div class="service-name">Office & Commercial</div>
+          <div class="service-desc">Maintain a professional, hygienic workspace that boosts productivity and impresses clients.</div>
+          <ul class="service-features">
+            <li>Workstations & common areas</li>
+            <li>Reception & meeting rooms</li>
+            <li>Restroom deep clean</li>
+            <li>After-hours availability</li>
+          </ul>
+          <button class="btn-book-service">Book This Service →</button>
+        </div>
+      </div>
+
+      <div class="service-card" onclick="bookService('Institutional Cleaning')">
+        <div class="service-img s3">🏫</div>
+        <div class="service-body">
+          <div class="service-name">Institutional Cleaning</div>
+          <div class="service-desc">Specialised cleaning for schools, hospitals, government buildings and large institutions.</div>
+          <ul class="service-features">
+            <li>Classrooms & corridors</li>
+            <li>Medical-grade sanitisation</li>
+            <li>Waste management support</li>
+            <li>Large team deployment</li>
+          </ul>
+          <button class="btn-book-service">Book This Service →</button>
+        </div>
+      </div>
+
+      <div class="service-card" onclick="bookService('Specialized Cleaning')">
+        <div class="service-img s4">✨</div>
+        <div class="service-body">
+          <div class="service-name">Specialized Cleaning</div>
+          <div class="service-desc">Deep cleaning solutions for carpets, upholstery, windows, after-construction and more.</div>
+          <ul class="service-features">
+            <li>Carpet & upholstery cleaning</li>
+            <li>Window & glass polishing</li>
+            <li>Post-construction cleanup</li>
+            <li>Industrial equipment cleaning</li>
+          </ul>
+          <button class="btn-book-service">Book This Service →</button>
+        </div>
+      </div>
+
+      <div class="service-card" onclick="bookService('Outdoor Cleaning')">
+        <div class="service-img s5">🌿</div>
+        <div class="service-body">
+          <div class="service-name">Outdoor Cleaning</div>
+          <div class="service-desc">Compounds, parking lots, pathways and outdoor spaces cleaned and maintained to perfection.</div>
+          <ul class="service-features">
+            <li>Compound sweeping & washing</li>
+            <li>Parking lot cleaning</li>
+            <li>Pathway pressure washing</li>
+            <li>Drainage clearance</li>
+          </ul>
+          <button class="btn-book-service">Book This Service →</button>
+        </div>
+      </div>
+
+      <div class="service-card" onclick="bookService('Event Cleaning')">
+        <div class="service-img s6">🎉</div>
+        <div class="service-body">
+          <div class="service-name">Event Cleaning</div>
+          <div class="service-desc">Pre-event setup, during-event maintenance and thorough post-event cleanup for all occasions.</div>
+          <ul class="service-features">
+            <li>Pre-event venue preparation</li>
+            <li>During-event trash management</li>
+            <li>Post-event deep clean</li>
+            <li>Weddings, conferences, parties</li>
+          </ul>
+          <button class="btn-book-service">Book This Service →</button>
+        </div>
+      </div>
+
+      <div class="service-card" onclick="bookService('Cleaning Supervision')">
+        <div class="service-img s7">📋</div>
+        <div class="service-body">
+          <div class="service-name">Cleaning Supervision</div>
+          <div class="service-desc">We provide professional supervisors to oversee and quality-check your existing cleaning team.</div>
+          <ul class="service-features">
+            <li>Experienced team supervisors</li>
+            <li>Quality auditing & reporting</li>
+            <li>Staff training & guidance</li>
+            <li>Custom schedule management</li>
+          </ul>
+          <button class="btn-book-service">Book This Service →</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- WHY US -->
+  <section class="section" id="why">
+    <div class="why-grid">
+      <div class="why-img-side">🧹</div>
+      <div>
+        <div class="section-label">Why Choose Us</div>
+        <h2 class="section-title">Cleaning You Can<br>Truly Rely On.</h2>
+        <div class="why-points" style="margin-top:32px;">
+          <div class="why-point">
+            <div class="why-icon">✅</div>
+            <div><h4>Trained & Vetted Staff</h4><p>All our cleaners are professionally trained, background-checked and uniformed for your peace of mind.</p></div>
+          </div>
+          <div class="why-point">
+            <div class="why-icon">⏰</div>
+            <div><h4>Always On Time</h4><p>We respect your schedule. Our teams arrive on time and complete work within the agreed timeframe.</p></div>
+          </div>
+          <div class="why-point">
+            <div class="why-icon">🧴</div>
+            <div><h4>Eco-Friendly Products</h4><p>We use safe, effective cleaning solutions that protect your family, pets and the environment.</p></div>
+          </div>
+          <div class="why-point">
+            <div class="why-icon">📱</div>
+            <div><h4>Easy Online Booking</h4><p>Book, track and manage your cleaning services entirely online — any time, from anywhere.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section process-section" id="process">
+    <div class="section-head">
+      <div class="section-label">How It Works</div>
+      <h2 class="section-title">Clean in 4 Simple Steps.</h2>
+      <p class="section-sub">From booking to spotless — the whole process is easy and transparent.</p>
+    </div>
+    <div class="process-grid">
+      <div class="process-step">
+        <div class="step-num">01</div>
+        <div class="step-icon">📝</div>
+        <div class="step-title">Register & Login</div>
+        <div class="step-desc">Create a free account on our platform to access all our services.</div>
+      </div>
+      <div class="process-step">
+        <div class="step-num">02</div>
+        <div class="step-icon">🗓️</div>
+        <div class="step-title">Book a Service</div>
+        <div class="step-desc">Choose your service, pick a date and time, provide your address.</div>
+      </div>
+      <div class="process-step">
+        <div class="step-num">03</div>
+        <div class="step-icon">✅</div>
+        <div class="step-title">We Confirm</div>
+        <div class="step-desc">Our admin reviews your request, approves it and assigns a qualified staff member.</div>
+      </div>
+      <div class="process-step">
+        <div class="step-num">04</div>
+        <div class="step-icon">✨</div>
+        <div class="step-title">Spotless Results</div>
+        <div class="step-desc">Our team arrives and delivers exceptional results. You're notified when done.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOGIN / REGISTER SECTION -->
+  <section class="login-section" id="loginSection">
+    <div class="login-wrap">
+      <div class="login-left">
+        <h2>Ready for a Cleaner Space?</h2>
+        <p>Login or create a free account to book services, track your requests and manage everything in one place.</p>
+        <div class="login-perks">
+          <div class="login-perk"><div class="login-perk-icon">📋</div>Book any of our 7 services</div>
+          <div class="login-perk"><div class="login-perk-icon">📍</div>Track your booking in real time</div>
+          <div class="login-perk"><div class="login-perk-icon">🔔</div>Get instant status notifications</div>
+          <div class="login-perk"><div class="login-perk-icon">👤</div>Manage your profile and history</div>
+        </div>
+      </div>
+      <div class="login-box">
+        <div class="login-tabs">
+          <div class="login-tab active" id="tabLogin" onclick="switchTab('login')">Sign In</div>
+          <div class="login-tab" id="tabRegister" onclick="switchTab('register')">Register</div>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div id="loginForm">
+          <div class="auth-msg" id="loginMsg"></div>
+          <div class="form-group"><label>Email Address</label><input type="email" id="loginEmail" placeholder="you@example.com"></div>
+          <div class="form-group"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
+          <button class="btn-login" id="loginBtn" onclick="handleLogin()">Sign In</button>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div id="registerForm" style="display:none;">
+          <div class="auth-msg" id="registerMsg"></div>
+          <div class="form-group"><label>Full Name</label><input type="text" id="regName" placeholder="John Doe"></div>
+          <div class="form-group"><label>Email Address</label><input type="email" id="regEmail" placeholder="you@example.com"></div>
+          <div class="form-group"><label>Phone Number</label><input type="tel" id="regPhone" placeholder="+254 700 000 000"></div>
+          <div class="form-group"><label>Password</label><input type="password" id="regPassword" placeholder="At least 6 characters"></div>
+          <button class="btn-login" id="registerBtn" onclick="handleRegister()">Create Free Account</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="logo">Typhi <span>Solution</span></div>
+    <p>© 2025 Typhi Solution Cleaning Services · Westlands, Nairobi</p>
+    <div class="footer-links">
+      <a onclick="scrollTo('services')">Services</a>
+      <a onclick="scrollTo('loginSection')">Login</a>
+    </div>
+  </footer>
+
+</div><!-- /publicPage -->
+
+
+<!-- ════════════════════════════════════════════════════════════
+     DASHBOARD APP
+════════════════════════════════════════════════════════════ -->
+<div class="app-page" id="appPage">
+
+  <nav class="app-nav">
+    <div class="app-nav-brand">Typhi <span>Solution</span></div>
+    <div class="app-nav-right">
+      <span class="role-pill" id="userRoleBadge">client</span>
+      <span class="nav-username" id="navUserName">Loading...</span>
+      <button class="btn-signout" onclick="handleLogout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="app-body">
+    <aside class="sidebar"><ul class="sidebar-nav" id="sidebarNav"></ul></aside>
+    <main class="main-content">
+
+      <!-- OVERVIEW -->
+      <div class="panel" id="panel-overview">
+        <div class="panel-title">Dashboard</div>
+        <div class="panel-sub" id="overviewSub">Welcome!</div>
+        <div id="roleBanner"></div>
+        <div class="stats-grid" id="statsGrid"></div>
+        <div id="overviewExtra"></div>
+      </div>
+
+      <!-- ADMIN: ALL BOOKINGS -->
+      <div class="panel" id="panel-allbookings">
+        <div class="panel-title">All Bookings</div>
+        <div class="panel-sub">Review, approve and manage every service request</div>
+        <div class="table-card">
+          <div class="table-header"><h3>Booking Requests</h3><input class="search-bar" placeholder="Search..." oninput="filterBookings(this.value)"></div>
+          <div id="allBookingsTable"><div class="loading">Loading...</div></div>
+        </div>
+      </div>
+
+      <!-- ADMIN: MEMBERS -->
+      <div class="panel" id="panel-users">
+        <div class="panel-title">Registered Members</div>
+        <div class="panel-sub">View all clients and manage their roles</div>
+        <div class="table-card">
+          <div class="table-header"><h3>All Members</h3><span id="usersCount" style="font-size:12px;color:#999;"></span></div>
+          <div id="usersTable"><div class="loading">Loading...</div></div>
+        </div>
+      </div>
+
+      <!-- ADMIN: STAFF MANAGEMENT -->
+      <div class="panel" id="panel-staff">
+        <div class="panel-title">Staff Management</div>
+        <div class="panel-sub">Add new staff and manage the team</div>
+        <div class="form-card" style="margin-bottom:20px;">
+          <h3 style="font-size:15px;font-weight:600;margin-bottom:16px;">➕ Add New Staff Member</h3>
+          <div class="msg-box" id="addStaffMsg"></div>
+          <div class="form-row">
+            <div class="fgrp"><label>Full Name</label><input type="text" id="staffName" placeholder="Jane Doe"></div>
+            <div class="fgrp"><label>Phone</label><input type="tel" id="staffPhone" placeholder="+254 700 000 000"></div>
+          </div>
+          <div class="fgrp"><label>Email Address</label><input type="email" id="staffEmail" placeholder="staff@example.com"></div>
+          <div class="fgrp"><label>Temporary Password</label><input type="text" id="staffPass" placeholder="They will use this to login"></div>
+          <button class="btn-submit" onclick="addStaff()">Create Staff Account</button>
+        </div>
+        <div class="table-card">
+          <div class="table-header"><h3>🧹 Current Staff</h3></div>
+          <div id="staffTable"><div class="loading">Loading...</div></div>
+        </div>
+      </div>
+
+      <!-- ADMIN: REPORTS -->
+      <div class="panel" id="panel-reports">
+        <div class="panel-title">Reports & Analytics</div>
+        <div class="panel-sub">Business performance overview</div>
+        <div id="reportsContent"><div class="loading">Generating report...</div></div>
+      </div>
+
+      <!-- ADMIN: ROLES -->
+      <div class="panel" id="panel-roles">
+        <div class="panel-title">Roles & Permissions</div>
+        <div class="panel-sub">What each role can and cannot do</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;">
+          <div class="perm-card">
+            <div class="perm-header admin">👑 Admin — Full Access</div>
+            <div class="perm-item"><span class="perm-yes">✅</span> View all registered members</div>
+            <div class="perm-item"><span class="perm-yes">✅</span> View all bookings</div>
+            <div class="perm-item"><span class="perm-yes">✅</span> Approve or reject bookings</div>
+            <div class="perm-item"><span class="perm-yes">✅</span> Assign bookings to staff</div>
+            <div class="perm-item"><span class="perm-yes">✅</span> Mark bookings as completed</div>
+            <div class="perm-item"><span class="perm-yes">✅</span> Add and manage staff accounts</div>
+            <div class="perm-item"><span class="perm-yes">✅</span> Change any user's role</div>
+            <div class="perm-item"><span class="perm-yes">✅</span> View business reports</div>
+          </div>
+          <div class="perm-card">
+            <div class="perm-header staff">🧹 Staff — Job Access</div>
+            <div class="perm-item"><span class="perm-yes">✅</span> View own assigned jobs only</div>
+            <div class="perm-item"><span class="perm-yes">✅</span> See client contact for their job</div>
+            <div class="perm-item"><span class="perm-yes">✅</span> Mark assigned jobs as completed</div>
+            <div class="perm-item"><span class="perm-yes">✅</span> Receive job notifications</div>
+            <div class="perm-item"><span class="perm-yes">✅</span> Update own profile</div>
+            <div class="perm-item"><span class="perm-no">❌</span> View other staff's jobs</div>
+            <div class="perm-item"><span class="perm-no">❌</span> Approve or assign bookings</div>
+            <div class="perm-item"><span class="perm-no">❌</span> Access admin reports</div>
+          </div>
+          <div class="perm-card">
+            <div class="perm-header client">👤 Client — Self Service</div>
+            <div class="perm-item"><span class="perm-yes">✅</span> Register and sign in</div>
+            <div class="perm-item"><span class="perm-yes">✅</span> Book any cleaning service</div>
+            <div class="perm-item"><span class="perm-yes">✅</span> View own bookings only</div>
+            <div class="perm-item"><span class="perm-yes">✅</span> Track booking status live</div>
+            <div class="perm-item"><span class="perm-yes">✅</span> Receive booking notifications</div>
+            <div class="perm-item"><span class="perm-yes">✅</span> Update own profile</div>
+            <div class="perm-item"><span class="perm-no">❌</span> View other clients' bookings</div>
+            <div class="perm-item"><span class="perm-no">❌</span> Access staff or admin areas</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLIENT: BOOK SERVICE -->
+      <div class="panel" id="panel-book">
+        <div class="panel-title">Book a Service</div>
+        <div class="panel-sub">Schedule a professional cleaning service</div>
+        <div class="form-card">
+          <div class="msg-box" id="bookMsg"></div>
+          <div class="fgrp"><label>Service Type</label>
+            <select id="bookService">
+              <option value="">Select a service...</option>
+              <option>Residential Cleaning</option>
+              <option>Office & Commercial Cleaning</option>
+              <option>Institutional Cleaning</option>
+              <option>Specialized Cleaning</option>
+              <option>Outdoor Cleaning</option>
+              <option>Event Cleaning</option>
+              <option>Cleaning Supervision</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="fgrp"><label>Preferred Date</label><input type="date" id="bookDate"></div>
+            <div class="fgrp"><label>Preferred Time</label><input type="time" id="bookTime"></div>
+          </div>
+          <div class="fgrp"><label>Service Address</label><input type="text" id="bookAddress" placeholder="Enter full address"></div>
+          <div class="fgrp"><label>Additional Notes</label><textarea id="bookNotes" placeholder="Any special instructions..."></textarea></div>
+          <button class="btn-submit" id="bookBtn" onclick="submitBooking()">Submit Booking Request</button>
+        </div>
+      </div>
+
+      <!-- CLIENT: MY BOOKINGS -->
+      <div class="panel" id="panel-mybookings">
+        <div class="panel-title">My Bookings</div>
+        <div class="panel-sub">Track all your service requests</div>
+        <div id="myBookingsList"></div>
+      </div>
+
+      <!-- STAFF: MY JOBS -->
+      <div class="panel" id="panel-jobs">
+        <div class="panel-title">My Assigned Jobs</div>
+        <div class="panel-sub">Jobs assigned to you by admin</div>
+        <div id="jobsList"></div>
+      </div>
+
+      <!-- NOTIFICATIONS -->
+      <div class="panel" id="panel-notifications">
+        <div class="panel-title">Notifications</div>
+        <div class="panel-sub">Your recent alerts and updates</div>
+        <div class="table-card" id="notifList"></div>
+      </div>
+
+      <!-- PROFILE -->
+      <div class="panel" id="panel-profile">
+        <div class="panel-title">My Profile</div>
+        <div class="panel-sub">Manage your account information</div>
+        <div class="form-card">
+          <div class="msg-box" id="profileMsg"></div>
+          <div id="profileRoleBanner" style="margin-bottom:16px;"></div>
+          <div class="fgrp"><label>Full Name</label><input type="text" id="profileName"></div>
+          <div class="fgrp"><label>Email (cannot change)</label><input type="email" id="profileEmail" disabled style="background:#f5f5f5;color:#999;"></div>
+          <div class="fgrp"><label>Phone</label><input type="tel" id="profilePhone"></div>
+          <div class="fgrp"><label>Address</label><input type="text" id="profileAddress"></div>
+          <button class="btn-submit" onclick="updateProfile()">Save Changes</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div><!-- /appPage -->
+
+<!-- ASSIGN MODAL -->
+<div class="modal-overlay" id="assignModal">
+  <div class="modal">
+    <h3>Assign Job to Staff</h3>
+    <p style="font-size:13px;color:#888;margin-bottom:14px;">Select a staff member for this booking.</p>
+    <div class="fgrp"><label>Staff Member</label><select id="staffSelect"><option>Loading...</option></select></div>
+    <div class="modal-actions">
+      <button class="btn-cancel-m" onclick="closeModal('assignModal')">Cancel</button>
+      <button class="btn-submit" style="padding:8px 20px;" onclick="confirmAssign()">Assign</button>
+    </div>
+  </div>
+</div>
+
+<!-- ROLE MODAL -->
+<div class="modal-overlay" id="roleModal">
+  <div class="modal">
+    <h3>Change User Role</h3>
+    <p style="font-size:13px;color:#888;margin-bottom:14px;" id="roleModalDesc"></p>
+    <div class="fgrp"><label>New Role</label>
+      <select id="newRoleSelect">
+        <option value="client">👤 Client</option>
+        <option value="staff">🧹 Staff</option>
+        <option value="admin">👑 Admin</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel-m" onclick="closeModal('roleModal')">Cancel</button>
+      <button class="btn-submit" style="padding:8px 20px;" onclick="confirmRoleChange()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// SUPABASE
+// ════════════════════════════════════════════════════════════
+const SUPABASE_URL='https://aqmawhhiuumextwfuwlb.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxbWF3aGhpdXVtZXh0d2Z1d2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMjE0MTYsImV4cCI6MjA4ODg5NzQxNn0.4mgJAntNHSgoWqkvuFPhZ04UFS--zJYbISzG3WDQkHY';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+let currentUser=null,currentProfile=null,allBookingsData=[],assigningBookingId=null,changingUserId=null,pendingService=null;
+
+// ════════════════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════════════════
+function scrollTo(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth'});}
+
+window.addEventListener('scroll',()=>{
+  document.getElementById('pubNav').classList.toggle('scrolled',window.scrollY>50);
+});
+
+function switchTab(tab){
+  document.getElementById('loginForm').style.display=tab==='login'?'block':'none';
+  document.getElementById('registerForm').style.display=tab==='register'?'block':'none';
+  document.getElementById('tabLogin').classList.toggle('active',tab==='login');
+  document.getElementById('tabRegister').classList.toggle('active',tab==='register');
+}
+
+function showPublic(){
+  document.getElementById('publicPage').classList.add('active');
+  document.getElementById('appPage').classList.remove('active');
+}
+
+function showApp(){
+  document.getElementById('publicPage').classList.remove('active');
+  document.getElementById('appPage').classList.add('active');
+}
+
+// ════════════════════════════════════════════════════════════
+// SERVICE CLICK → BOOK
+// ════════════════════════════════════════════════════════════
+function bookService(serviceName){
+  if(!currentUser){
+    // Not logged in — scroll to login and remember what they wanted
+    pendingService=serviceName;
+    scrollTo('loginSection');
+    switchTab('register');
+    const msg=document.getElementById('registerMsg');
+    showMsg(msg,'success',`Great choice! Register or login to book "${serviceName}".`);
+  } else {
+    // Already logged in — go to book panel with service pre-filled
+    showApp();
+    showPanel('book');
+    document.getElementById('bookService').value=serviceName;
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════════════════════
+async function handleLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const password=document.getElementById('loginPassword').value;
+  const btn=document.getElementById('loginBtn');
+  const msg=document.getElementById('loginMsg');
+  msg.className='auth-msg';
+  if(!email||!password){showMsg(msg,'error','Please fill in all fields.');return;}
+  btn.disabled=true; btn.textContent='Signing in...';
+  const {data,error}=await sb.auth.signInWithPassword({email,password});
+  if(error){showMsg(msg,'error',error.message);btn.disabled=false;btn.textContent='Sign In';return;}
+  btn.disabled=false; btn.textContent='Sign In';
+  await loadApp(data.user);
+}
+
+async function handleRegister(){
+  const name=document.getElementById('regName').value.trim();
+  const email=document.getElementById('regEmail').value.trim();
+  const phone=document.getElementById('regPhone').value.trim();
+  const password=document.getElementById('regPassword').value;
+  const btn=document.getElementById('registerBtn');
+  const msg=document.getElementById('registerMsg');
+  msg.className='auth-msg';
+  if(!name||!email||!password){showMsg(msg,'error','Please fill all required fields.');return;}
+  if(password.length<6){showMsg(msg,'error','Password must be at least 6 characters.');return;}
+  btn.disabled=true; btn.textContent='Creating account...';
+  const {data,error}=await sb.auth.signUp({email,password});
+  if(error){showMsg(msg,'error',error.message);btn.disabled=false;btn.textContent='Create Free Account';return;}
+  if(data.user){
+    await sb.from('profiles').insert({id:data.user.id,full_name:name,email,phone,role:'client'});
+    const {data:admins}=await sb.from('profiles').select('id').eq('role','admin');
+    if(admins) for(const a of admins) await sb.from('notifications').insert({user_id:a.id,message:`🆕 New client registered: ${name} (${email})`});
+    // Auto sign in after register
+    const {data:signIn}=await sb.auth.signInWithPassword({email,password});
+    if(signIn?.user){btn.disabled=false;btn.textContent='Create Free Account';await loadApp(signIn.user);return;}
+    showMsg(msg,'success','Account created! You can now sign in.');
+  }
+  btn.disabled=false; btn.textContent='Create Free Account';
+}
+
+async function handleLogout(){
+  await sb.auth.signOut();
+  currentUser=null; currentProfile=null;
+  showPublic();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ════════════════════════════════════════════════════════════
+// LOAD APP
+// ════════════════════════════════════════════════════════════
+async function loadApp(user){
+  currentUser=user;
+  let profile=null;
+  for(let i=0;i<3;i++){
+    const {data}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();
+    if(data){profile=data;break;}
+    await new Promise(r=>setTimeout(r,700));
+  }
+  if(!profile){
+    const {data:np}=await sb.from('profiles').insert({id:user.id,full_name:user.email,email:user.email,role:'client'}).select().single();
+    profile=np;
+  }
+  currentProfile=profile;
+  const role=profile?.role||'client';
+  document.getElementById('navUserName').textContent=profile?.full_name||user.email;
+  document.getElementById('userRoleBadge').textContent=role;
+  document.getElementById('userRoleBadge').className=`role-pill ${role}`;
+  buildSidebar(role);
+  showApp();
+  // If they clicked a service card before logging in, send to book that service
+  if(pendingService){
+    showPanel('book');
+    document.getElementById('bookService').value=pendingService;
+    pendingService=null;
+  } else {
+    showPanel('overview');
+    loadOverview();
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// SIDEBAR
+// ════════════════════════════════════════════════════════════
+function buildSidebar(role){
+  const nav=document.getElementById('sidebarNav');
+  let html='';
+  if(role==='admin'){
+    html=`
+      <div class="sidebar-section">Dashboard</div>
+      <li><a onclick="showPanel('overview')" id="nav-overview"><span class="icon">📊</span>Overview</a></li>
+      <div class="sidebar-section">Bookings</div>
+      <li><a onclick="showPanel('allbookings')" id="nav-allbookings"><span class="icon">📋</span>All Bookings</a></li>
+      <div class="sidebar-section">People</div>
+      <li><a onclick="showPanel('users')" id="nav-users"><span class="icon">👥</span>Members</a></li>
+      <li><a onclick="showPanel('staff')" id="nav-staff"><span class="icon">🧹</span>Staff Management</a></li>
+      <div class="sidebar-section">System</div>
+      <li><a onclick="showPanel('reports')" id="nav-reports"><span class="icon">📈</span>Reports</a></li>
+      <li><a onclick="showPanel('roles')" id="nav-roles"><span class="icon">🔐</span>Roles & Permissions</a></li>
+      <li><a onclick="showPanel('notifications')" id="nav-notifications"><span class="icon">🔔</span>Notifications</a></li>
+      <li><a onclick="showPanel('profile')" id="nav-profile"><span class="icon">👤</span>My Profile</a></li>`;
+  } else if(role==='staff'){
+    html=`
+      <div class="sidebar-section">Dashboard</div>
+      <li><a onclick="showPanel('overview')" id="nav-overview"><span class="icon">📊</span>Overview</a></li>
+      <div class="sidebar-section">My Work</div>
+      <li><a onclick="showPanel('jobs')" id="nav-jobs"><span class="icon">🧹</span>My Jobs</a></li>
+      <div class="sidebar-section">Account</div>
+      <li><a onclick="showPanel('notifications')" id="nav-notifications"><span class="icon">🔔</span>Notifications</a></li>
+      <li><a onclick="showPanel('profile')" id="nav-profile"><span class="icon">👤</span>My Profile</a></li>`;
+  } else {
+    html=`
+      <div class="sidebar-section">Dashboard</div>
+      <li><a onclick="showPanel('overview')" id="nav-overview"><span class="icon">🏠</span>Overview</a></li>
+      <div class="sidebar-section">Services</div>
+      <li><a onclick="showPanel('book')" id="nav-book"><span class="icon">➕</span>Book a Service</a></li>
+      <li><a onclick="showPanel('mybookings')" id="nav-mybookings"><span class="icon">📋</span>My Bookings</a></li>
+      <div class="sidebar-section">Account</div>
+      <li><a onclick="showPanel('notifications')" id="nav-notifications"><span class="icon">🔔</span>Notifications</a></li>
+      <li><a onclick="showPanel('profile')" id="nav-profile"><span class="icon">👤</span>My Profile</a></li>`;
+  }
+  nav.innerHTML=html;
+}
+
+function showPanel(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-nav a').forEach(a=>a.classList.remove('active'));
+  const panel=document.getElementById(`panel-${id}`);
+  const nav=document.getElementById(`nav-${id}`);
+  if(panel) panel.classList.add('active');
+  if(nav) nav.classList.add('active');
+  const loaders={allbookings:loadAllBookings,users:loadUsers,staff:loadStaff,mybookings:loadMyBookings,jobs:loadJobs,notifications:loadNotifications,profile:loadProfile,reports:loadReports};
+  if(loaders[id]) loaders[id]();
+}
+
+// ════════════════════════════════════════════════════════════
+// OVERVIEW
+// ════════════════════════════════════════════════════════════
+async function loadOverview(){
+  const role=currentProfile?.role||'client';
+  const name=currentProfile?.full_name||currentUser?.email||'';
+  document.getElementById('overviewSub').textContent=`Good to see you, ${name}!`;
+  const banners={
+    admin:`<div class="role-banner admin">👑 <div><strong>Admin Dashboard</strong> — Full control: manage bookings, members, staff and reports.</div></div>`,
+    staff:`<div class="role-banner staff">🧹 <div><strong>Staff Dashboard</strong> — View your assigned jobs and mark them complete.</div></div>`,
+    client:`<div class="role-banner client">👤 <div><strong>Welcome!</strong> — Book a cleaning service or track your existing requests below.</div></div>`
+  };
+  document.getElementById('roleBanner').innerHTML=banners[role]||banners.client;
+  const grid=document.getElementById('statsGrid');
+  const extra=document.getElementById('overviewExtra');
+
+  if(role==='admin'){
+    const [{count:clients},{count:staffC},{count:total},{count:pending},{count:active},{count:completed}]=await Promise.all([
+      sb.from('profiles').select('*',{count:'exact',head:true}).eq('role','client'),
+      sb.from('profiles').select('*',{count:'exact',head:true}).eq('role','staff'),
+      sb.from('bookings').select('*',{count:'exact',head:true}),
+      sb.from('bookings').select('*',{count:'exact',head:true}).eq('status','pending'),
+      sb.from('bookings').select('*',{count:'exact',head:true}).eq('status','active'),
+      sb.from('bookings').select('*',{count:'exact',head:true}).eq('status','completed'),
+    ]);
+    grid.innerHTML=`
+      <div class="stat-card blue"><div class="stat-number">${clients||0}</div><div class="stat-label">Clients</div></div>
+      <div class="stat-card purple"><div class="stat-number">${staffC||0}</div><div class="stat-label">Staff</div></div>
+      <div class="stat-card orange"><div class="stat-number">${pending||0}</div><div class="stat-label">Pending</div></div>
+      <div class="stat-card blue"><div class="stat-number">${active||0}</div><div class="stat-label">Active Jobs</div></div>
+      <div class="stat-card green"><div class="stat-number">${completed||0}</div><div class="stat-label">Completed</div></div>
+      <div class="stat-card"><div class="stat-number">${total||0}</div><div class="stat-label">Total Bookings</div></div>`;
+    const {data:rU}=await sb.from('profiles').select('*').eq('role','client').order('created_at',{ascending:false}).limit(5);
+    const {data:rB}=await sb.from('bookings').select('*,profiles!bookings_client_id_fkey(full_name)').order('created_at',{ascending:false}).limit(5);
+    extra.innerHTML=`
+      <div class="table-card"><div class="table-header"><h3>🆕 Recent Registrations</h3></div>
+      <table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Joined</th></tr></thead><tbody>
+      ${(rU||[]).map(u=>`<tr><td><strong>${u.full_name||'—'}</strong></td><td>${u.email||'—'}</td><td>${u.phone||'—'}</td><td>${fDate(u.created_at)}</td></tr>`).join('')||noRows(4,'No clients yet')}
+      </tbody></table></div>
+      <div class="table-card" style="margin-top:16px;"><div class="table-header"><h3>📋 Recent Bookings</h3></div>
+      <table><thead><tr><th>Client</th><th>Service</th><th>Date</th><th>Status</th></tr></thead><tbody>
+      ${(rB||[]).map(b=>`<tr><td>${b.profiles?.full_name||'—'}</td><td>${b.service}</td><td>${b.date||'—'}</td><td><span class="badge badge-${b.status}">${b.status}</span></td></tr>`).join('')||noRows(4,'No bookings yet')}
+      </tbody></table></div>`;
+  } else if(role==='staff'){
+    const [{count:assigned},{count:active},{count:done}]=await Promise.all([
+      sb.from('bookings').select('*',{count:'exact',head:true}).eq('assigned_to',currentUser.id),
+      sb.from('bookings').select('*',{count:'exact',head:true}).eq('assigned_to',currentUser.id).eq('status','active'),
+      sb.from('bookings').select('*',{count:'exact',head:true}).eq('assigned_to',currentUser.id).eq('status','completed'),
+    ]);
+    grid.innerHTML=`
+      <div class="stat-card"><div class="stat-number">${assigned||0}</div><div class="stat-label">Total Assigned</div></div>
+      <div class="stat-card orange"><div class="stat-number">${active||0}</div><div class="stat-label">Active Jobs</div></div>
+      <div class="stat-card green"><div class="stat-number">${done||0}</div><div class="stat-label">Completed</div></div>`;
+    extra.innerHTML=`<div class="role-banner staff">💡 Go to <strong>My Jobs</strong> to view and update your assigned tasks.</div>`;
+  } else {
+    const [{count:total},{count:pending},{count:active},{count:completed}]=await Promise.all([
+      sb.from('bookings').select('*',{count:'exact',head:true}).eq('client_id',currentUser.id),
+      sb.from('bookings').select('*',{count:'exact',head:true}).eq('client_id',currentUser.id).eq('status','pending'),
+      sb.from('bookings').select('*',{count:'exact',head:true}).eq('client_id',currentUser.id).eq('status','active'),
+      sb.from('bookings').select('*',{count:'exact',head:true}).eq('client_id',currentUser.id).eq('status','completed'),
+    ]);
+    grid.innerHTML=`
+      <div class="stat-card"><div class="stat-number">${total||0}</div><div class="stat-label">Total</div></div>
+      <div class="stat-card orange"><div class="stat-number">${pending||0}</div><div class="stat-label">Pending</div></div>
+      <div class="stat-card blue"><div class="stat-number">${active||0}</div><div class="stat-label">Active</div></div>
+      <div class="stat-card green"><div class="stat-number">${completed||0}</div><div class="stat-label">Completed</div></div>`;
+    extra.innerHTML=`<div class="role-banner client" style="cursor:pointer;" onclick="showPanel('book')">➕ <div><strong>Book a new service</strong> — Click here or use the sidebar to schedule a cleaning.</div></div>`;
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// BOOKING
+// ════════════════════════════════════════════════════════════
+async function submitBooking(){
+  const service=document.getElementById('bookService').value;
+  const date=document.getElementById('bookDate').value;
+  const time=document.getElementById('bookTime').value;
+  const address=document.getElementById('bookAddress').value.trim();
+  const notes=document.getElementById('bookNotes').value.trim();
+  const btn=document.getElementById('bookBtn');
+  const msg=document.getElementById('bookMsg');
+  msg.className='msg-box';
+  if(!service||!date||!address){showMsg(msg,'error','Please fill in service type, date and address.');return;}
+  btn.disabled=true; btn.textContent='Submitting...';
+  const {error}=await sb.from('bookings').insert({client_id:currentUser.id,service,date,time,address,notes,status:'pending'});
+  if(error){showMsg(msg,'error',error.message);btn.disabled=false;btn.textContent='Submit Booking Request';return;}
+  const {data:admins}=await sb.from('profiles').select('id').eq('role','admin');
+  if(admins) for(const a of admins) await sb.from('notifications').insert({user_id:a.id,message:`📅 New booking: "${service}" from ${currentProfile?.full_name} on ${date}`});
+  showMsg(msg,'success','✅ Booking submitted! We will review and confirm shortly.');
+  ['bookService','bookDate','bookTime','bookAddress','bookNotes'].forEach(id=>document.getElementById(id).value='');
+  btn.disabled=false; btn.textContent='Submit Booking Request';
+}
+
+// ════════════════════════════════════════════════════════════
+// MY BOOKINGS
+// ════════════════════════════════════════════════════════════
+async function loadMyBookings(){
+  const c=document.getElementById('myBookingsList');
+  c.innerHTML='<div class="loading">Loading...</div>';
+  const {data}=await sb.from('bookings').select('*').eq('client_id',currentUser.id).order('created_at',{ascending:false});
+  if(!data||!data.length){c.innerHTML='<div class="empty"><div class="empty-icon">📋</div><p>No bookings yet. <a onclick="showPanel(\'book\')" style="color:var(--green);cursor:pointer;font-weight:600;">Book your first service →</a></p></div>';return;}
+  c.innerHTML=data.map(b=>`
+    <div class="booking-card ${b.status}">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px;">
+        <div><strong style="font-size:15px;">${b.service}</strong>
+        <div style="font-size:12px;color:#888;margin-top:2px;">📅 ${b.date||'—'} ${b.time?'@ '+b.time:''} &nbsp;|&nbsp; 📍 ${b.address}</div></div>
+        <span class="badge badge-${b.status}">${b.status}</span>
+      </div>
+      ${b.notes?`<div style="font-size:12px;color:#666;margin-bottom:10px;">📝 ${b.notes}</div>`:''}
+      <div class="tracker">${tracker(b.status)}</div>
+      <div style="font-size:11px;color:#bbb;margin-top:6px;">Submitted: ${fDate(b.created_at)}</div>
+    </div>`).join('');
+}
+
+function tracker(status){
+  if(status==='cancelled') return `<div class="t-step cancelled"><div class="t-dot">✕</div><div class="t-label">Cancelled</div></div>`;
+  const steps=['pending','active','completed'];
+  const idx=steps.indexOf(status);
+  return steps.map((s,i)=>`<div class="t-step ${i<idx?'done':i===idx?'current':''}"><div class="t-dot">${i<idx?'✓':i+1}</div><div class="t-label">${s.charAt(0).toUpperCase()+s.slice(1)}</div></div>`).join('');
+}
+
+// ════════════════════════════════════════════════════════════
+// ALL BOOKINGS (ADMIN)
+// ════════════════════════════════════════════════════════════
+async function loadAllBookings(){
+  document.getElementById('allBookingsTable').innerHTML='<div class="loading">Loading...</div>';
+  const {data}=await sb.from('bookings').select('*,profiles!bookings_client_id_fkey(full_name,email,phone)').order('created_at',{ascending:false});
+  allBookingsData=data||[];
+  renderBookings(allBookingsData);
+}
+
+function renderBookings(data){
+  const c=document.getElementById('allBookingsTable');
+  if(!data||!data.length){c.innerHTML='<div class="empty"><div class="empty-icon">📋</div><p>No bookings yet.</p></div>';return;}
+  c.innerHTML=`<table><thead><tr><th>Client</th><th>Service</th><th>Date</th><th>Address</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+  ${data.map(b=>`<tr>
+    <td><strong>${b.profiles?.full_name||'—'}</strong><br><span style="font-size:11px;color:#999;">${b.profiles?.email||''}</span></td>
+    <td>${b.service}</td><td>${b.date||'—'}</td>
+    <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${b.address||''}">${b.address||'—'}</td>
+    <td><span class="badge badge-${b.status}">${b.status}</span></td>
+    <td style="display:flex;gap:5px;flex-wrap:wrap;">
+      ${b.status==='pending'?`<button class="btn-sm btn-approve" onclick="updateStatus('${b.id}','active')">✓ Approve</button><button class="btn-sm btn-reject" onclick="updateStatus('${b.id}','cancelled')">✕ Reject</button>`:''}
+      ${b.status==='active'?`<button class="btn-sm btn-assign" onclick="openAssign('${b.id}')">👤 Assign</button><button class="btn-sm btn-complete" onclick="updateStatus('${b.id}','completed')">✓ Complete</button>`:''}
+      ${b.status==='completed'||b.status==='cancelled'?'<span style="color:#ccc;font-size:11px;">Closed</span>':''}
+    </td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+function filterBookings(q){
+  renderBookings(allBookingsData.filter(b=>
+    (b.profiles?.full_name||'').toLowerCase().includes(q.toLowerCase())||
+    (b.service||'').toLowerCase().includes(q.toLowerCase())||
+    (b.status||'').toLowerCase().includes(q.toLowerCase())
+  ));
+}
+
+async function updateStatus(id,status){
+  await sb.from('bookings').update({status}).eq('id',id);
+  const b=allBookingsData.find(x=>x.id===id);
+  if(b){
+    const m=status==='active'?'✅ approved':status==='cancelled'?'❌ cancelled':'✅ completed';
+    await sb.from('notifications').insert({user_id:b.client_id,message:`📬 Your booking for "${b.service}" has been ${m}.`});
+  }
+  loadAllBookings(); loadOverview();
+}
+
+// ════════════════════════════════════════════════════════════
+// ASSIGN
+// ════════════════════════════════════════════════════════════
+async function openAssign(id){
+  assigningBookingId=id;
+  const {data}=await sb.from('profiles').select('id,full_name').eq('role','staff');
+  const sel=document.getElementById('staffSelect');
+  sel.innerHTML=!data||!data.length?'<option>No staff yet</option>':data.map(s=>`<option value="${s.id}">${s.full_name}</option>`).join('');
+  document.getElementById('assignModal').classList.add('active');
+}
+
+async function confirmAssign(){
+  const staffId=document.getElementById('staffSelect').value;
+  if(!staffId||!assigningBookingId) return;
+  await sb.from('bookings').update({assigned_to:staffId}).eq('id',assigningBookingId);
+  const b=allBookingsData.find(x=>x.id===assigningBookingId);
+  const {data:sm}=await sb.from('profiles').select('full_name').eq('id',staffId).single();
+  await sb.from('notifications').insert({user_id:staffId,message:`🧹 New job: "${b?.service||'Cleaning'}" on ${b?.date||'TBD'} at ${b?.address||'—'}`});
+  if(b) await sb.from('notifications').insert({user_id:b.client_id,message:`👤 Your "${b.service}" booking assigned to ${sm?.full_name||'a staff member'}.`});
+  closeModal('assignModal');
+  loadAllBookings();
+}
+
+// ════════════════════════════════════════════════════════════
+// MEMBERS
+// ════════════════════════════════════════════════════════════
+async function loadUsers(){
+  document.getElementById('usersTable').innerHTML='<div class="loading">Loading...</div>';
+  const {data}=await sb.from('profiles').select('*').order('created_at',{ascending:false});
+  document.getElementById('usersCount').textContent=`${data?.length||0} total`;
+  if(!data||!data.length){document.getElementById('usersTable').innerHTML='<div class="empty"><div class="empty-icon">👥</div><p>No members yet.</p></div>';return;}
+  document.getElementById('usersTable').innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Joined</th><th>Actions</th></tr></thead><tbody>
+  ${data.map(u=>`<tr>
+    <td><strong>${u.full_name||'—'}</strong></td>
+    <td>${u.email||'—'}</td><td>${u.phone||'—'}</td>
+    <td><span class="badge badge-${u.role}">${u.role}</span></td>
+    <td>${fDate(u.created_at)}</td>
+    <td>${u.id!==currentUser.id?`<button class="btn-sm btn-role" onclick="openRoleChange('${u.id}','${(u.full_name||u.email).replace(/'/g,"\\'")}','${u.role}')">✎ Role</button>`:'<span style="color:#ccc;font-size:11px;">You</span>'}</td>
+  </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function openRoleChange(userId,name,currentRole){
+  changingUserId=userId;
+  document.getElementById('roleModalDesc').textContent=`Changing role for: ${name} (currently: ${currentRole})`;
+  document.getElementById('newRoleSelect').value=currentRole;
+  document.getElementById('roleModal').classList.add('active');
+}
+
+async function confirmRoleChange(){
+  const newRole=document.getElementById('newRoleSelect').value;
+  if(!changingUserId||!newRole) return;
+  await sb.from('profiles').update({role:newRole}).eq('id',changingUserId);
+  await sb.from('notifications').insert({user_id:changingUserId,message:`🔔 Your account role has been updated to: ${newRole}`});
+  closeModal('roleModal');
+  loadUsers();
+}
+
+// ════════════════════════════════════════════════════════════
+// STAFF MANAGEMENT
+// ════════════════════════════════════════════════════════════
+async function loadStaff(){
+  document.getElementById('staffTable').innerHTML='<div class="loading">Loading...</div>';
+  const {data}=await sb.from('profiles').select('*').eq('role','staff').order('created_at',{ascending:false});
+  if(!data||!data.length){document.getElementById('staffTable').innerHTML='<div class="empty"><div class="empty-icon">🧹</div><p>No staff yet. Add one above.</p></div>';return;}
+  document.getElementById('staffTable').innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Joined</th><th>Actions</th></tr></thead><tbody>
+  ${data.map(s=>`<tr>
+    <td><strong>${s.full_name||'—'}</strong></td>
+    <td>${s.email||'—'}</td><td>${s.phone||'—'}</td><td>${fDate(s.created_at)}</td>
+    <td><button class="btn-sm btn-demote" onclick="demoteToClient('${s.id}','${(s.full_name||s.email).replace(/'/g,"\\'")}')">Demote to Client</button></td>
+  </tr>`).join('')}
+  </tbody></table>`;
+}
+
+async function addStaff(){
+  const name=document.getElementById('staffName').value.trim();
+  const email=document.getElementById('staffEmail').value.trim();
+  const phone=document.getElementById('staffPhone').value.trim();
+  const pass=document.getElementById('staffPass').value;
+  const msg=document.getElementById('addStaffMsg');
+  msg.className='msg-box';
+  if(!name||!email||!pass){showMsg(msg,'error','Please fill in name, email and password.');return;}
+  const {data,error}=await sb.auth.signUp({email,password:pass});
+  if(error){showMsg(msg,'error',error.message);return;}
+  if(data.user){
+    await sb.from('profiles').insert({id:data.user.id,full_name:name,email,phone,role:'staff'});
+    showMsg(msg,'success',`✅ Staff account created for ${name}.`);
+    ['staffName','staffEmail','staffPhone','staffPass'].forEach(id=>document.getElementById(id).value='');
+    loadStaff();
+  }
+}
+
+async function demoteToClient(id,name){
+  if(!confirm(`Demote ${name} to client?`)) return;
+  await sb.from('profiles').update({role:'client'}).eq('id',id);
+  await sb.from('notifications').insert({user_id:id,message:`🔔 Your role has been changed to client.`});
+  loadStaff();
+}
+
+// ════════════════════════════════════════════════════════════
+// REPORTS
+// ════════════════════════════════════════════════════════════
+async function loadReports(){
+  const c=document.getElementById('reportsContent');
+  c.innerHTML='<div class="loading">Generating...</div>';
+  const [{count:clients},{count:staffC},{count:total},{count:pending},{count:active},{count:completed},{count:cancelled}]=await Promise.all([
+    sb.from('profiles').select('*',{count:'exact',head:true}).eq('role','client'),
+    sb.from('profiles').select('*',{count:'exact',head:true}).eq('role','staff'),
+    sb.from('bookings').select('*',{count:'exact',head:true}),
+    sb.from('bookings').select('*',{count:'exact',head:true}).eq('status','pending'),
+    sb.from('bookings').select('*',{count:'exact',head:true}).eq('status','active'),
+    sb.from('bookings').select('*',{count:'exact',head:true}).eq('status','completed'),
+    sb.from('bookings').select('*',{count:'exact',head:true}).eq('status','cancelled'),
+  ]);
+  const rate=total?Math.round(((completed||0)/total)*100):0;
+  c.innerHTML=`
+    <div class="stats-grid">
+      <div class="stat-card blue"><div class="stat-number">${clients||0}</div><div class="stat-label">Total Clients</div></div>
+      <div class="stat-card purple"><div class="stat-number">${staffC||0}</div><div class="stat-label">Total Staff</div></div>
+      <div class="stat-card"><div class="stat-number">${total||0}</div><div class="stat-label">Total Bookings</div></div>
+      <div class="stat-card green"><div class="stat-number">${rate}%</div><div class="stat-label">Completion Rate</div></div>
+    </div>
+    <div class="table-card"><div class="table-header"><h3>📊 Booking Breakdown</h3></div>
+    <div style="padding:20px;">
+      ${bar('Pending',pending,total,'var(--orange)')}
+      ${bar('Active',active,total,'var(--blue)')}
+      ${bar('Completed',completed,total,'var(--green)')}
+      ${bar('Cancelled',cancelled,total,'var(--red)')}
+    </div></div>`;
+}
+
+function bar(label,count,total,color){
+  const pct=total?Math.round(((count||0)/total)*100):0;
+  return `<div class="bar-wrap"><div class="bar-label"><span>${label}</span><span><strong>${count||0}</strong> (${pct}%)</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color};"></div></div></div>`;
+}
+
+// ════════════════════════════════════════════════════════════
+// STAFF JOBS
+// ════════════════════════════════════════════════════════════
+async function loadJobs(){
+  const c=document.getElementById('jobsList');
+  c.innerHTML='<div class="loading">Loading...</div>';
+  const {data}=await sb.from('bookings').select('*,profiles!bookings_client_id_fkey(full_name,phone,email)').eq('assigned_to',currentUser.id).order('created_at',{ascending:false});
+  if(!data||!data.length){c.innerHTML='<div class="empty"><div class="empty-icon">🧹</div><p>No jobs assigned yet.</p></div>';return;}
+  c.innerHTML=data.map(b=>`
+    <div class="booking-card ${b.status}">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
+        <div><strong style="font-size:15px;">${b.service}</strong>
+        <div style="font-size:12px;color:#888;margin-top:2px;">👤 ${b.profiles?.full_name||'—'} &nbsp;|&nbsp; 📞 ${b.profiles?.phone||'—'}</div>
+        <div style="font-size:12px;color:#888;">📅 ${b.date||'—'} ${b.time?'@ '+b.time:''}</div>
+        <div style="font-size:12px;color:#555;">📍 ${b.address||'—'}</div></div>
+        <span class="badge badge-${b.status}">${b.status}</span>
+      </div>
+      ${b.notes?`<div style="font-size:12px;color:#666;margin:8px 0;">📝 ${b.notes}</div>`:''}
+      <div style="margin-top:10px;">
+        ${b.status==='active'?`<button class="btn-sm btn-complete" onclick="completeJob('${b.id}')">✓ Mark as Completed</button>`:''}
+        ${b.status==='completed'?'<span style="color:var(--green);font-size:13px;font-weight:600;">✓ Completed</span>':''}
+        ${b.status==='pending'?'<span style="font-size:12px;color:#aaa;">⏳ Awaiting admin approval</span>':''}
+      </div>
+    </div>`).join('');
+}
+
+async function completeJob(id){
+  const {data:b}=await sb.from('bookings').select('*').eq('id',id).single();
+  await sb.from('bookings').update({status:'completed'}).eq('id',id);
+  if(b) await sb.from('notifications').insert({user_id:b.client_id,message:`✅ Your "${b.service}" has been completed! Thank you for choosing Typhi Solution.`});
+  loadJobs(); loadOverview();
+}
+
+// ════════════════════════════════════════════════════════════
+// NOTIFICATIONS
+// ════════════════════════════════════════════════════════════
+async function loadNotifications(){
+  const c=document.getElementById('notifList');
+  const {data}=await sb.from('notifications').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+  if(!data||!data.length){c.innerHTML='<div class="empty"><div class="empty-icon">🔔</div><p>No notifications yet.</p></div>';return;}
+  c.innerHTML=data.map(n=>`<div class="notif-item ${n.is_read?'':'unread'}"><div>${n.message}</div><div class="notif-time">${fDate(n.created_at)}</div></div>`).join('');
+  await sb.from('notifications').update({is_read:true}).eq('user_id',currentUser.id);
+}
+
+// ════════════════════════════════════════════════════════════
+// PROFILE
+// ════════════════════════════════════════════════════════════
+async function loadProfile(){
+  if(!currentProfile) return;
+  const rd={admin:'👑 Admin — Full system access',staff:'🧹 Staff — Manage assigned jobs',client:'👤 Client — Book and track services'};
+  document.getElementById('profileRoleBanner').innerHTML=`<div class="role-banner ${currentProfile.role}">${rd[currentProfile.role]||''}</div>`;
+  document.getElementById('profileName').value=currentProfile.full_name||'';
+  document.getElementById('profileEmail').value=currentProfile.email||'';
+  document.getElementById('profilePhone').value=currentProfile.phone||'';
+  document.getElementById('profileAddress').value=currentProfile.address||'';
+}
+
+async function updateProfile(){
+  const name=document.getElementById('profileName').value.trim();
+  const phone=document.getElementById('profilePhone').value.trim();
+  const address=document.getElementById('profileAddress').value.trim();
+  const msg=document.getElementById('profileMsg');
+  const {error}=await sb.from('profiles').update({full_name:name,phone,address}).eq('id',currentUser.id);
+  if(error){showMsg(msg,'error',error.message);return;}
+  currentProfile={...currentProfile,full_name:name,phone,address};
+  document.getElementById('navUserName').textContent=name;
+  showMsg(msg,'success','✅ Profile updated!');
+  setTimeout(()=>{msg.className='msg-box';},3000);
+}
+
+// ════════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════════
+function showMsg(el,type,text){el.className=`${el.className.split(' ')[0]} ${type}`;el.textContent=text;}
+function fDate(str){if(!str) return '—';return new Date(str).toLocaleDateString('en-KE',{day:'numeric',month:'short',year:'numeric'});}
+function closeModal(id){document.getElementById(id).classList.remove('active');}
+function noRows(cols,msg){return `<tr><td colspan="${cols}" style="text-align:center;color:#ccc;padding:20px;">${msg}</td></tr>`;}
+
+// ════════════════════════════════════════════════════════════
+// INIT — check if already logged in
+// ════════════════════════════════════════════════════════════
+(async()=>{
+  const {data:{session}}=await sb.auth.getSession();
+  if(session?.user) await loadApp(session.user);
+  else showPublic();
+})();
+</script>
+</body>
+</html>
