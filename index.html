@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Typhi Solution — Cleaning Services</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --green: #2d7a2d;
+    --green-light: #3a9c3a;
+    --green-dark: #1a4d1a;
+    --black: #111111;
+    --dark: #1a1a1a;
+    --gray: #f5f5f5;
+    --gray2: #e8e8e8;
+    --text: #333;
+    --white: #ffffff;
+    --red: #c0392b;
+    --orange: #e67e22;
+    --blue: #2980b9;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Outfit', sans-serif; background: var(--gray); color: var(--text); min-height: 100vh; }
+
+  /* AUTH SCREENS */
+  .auth-screen { display: none; min-height: 100vh; background: linear-gradient(135deg, #0a1f0a 0%, #1a3d1a 50%, #0d2d0d 100%); align-items: center; justify-content: center; padding: 20px; }
+  .auth-screen.active { display: flex; }
+  .auth-box { background: white; border-radius: 16px; padding: 48px 40px; width: 100%; max-width: 440px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  .auth-logo { text-align: center; margin-bottom: 32px; }
+  .auth-logo h1 { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: var(--green-dark); }
+  .auth-logo p { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #888; margin-top: 4px; }
+  .auth-title { font-size: 22px; font-weight: 600; color: var(--black); margin-bottom: 8px; }
+  .auth-subtitle { font-size: 14px; color: #888; margin-bottom: 28px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+  .form-group input, .form-group select { width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray2); border-radius: 8px; font-size: 14px; font-family: 'Outfit', sans-serif; outline: none; transition: border 0.2s; }
+  .form-group input:focus, .form-group select:focus { border-color: var(--green); }
+  .btn { width: 100%; padding: 13px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'Outfit', sans-serif; }
+  .btn-green { background: var(--green); color: white; }
+  .btn-green:hover { background: var(--green-dark); }
+  .btn-green:disabled { background: #aaa; cursor: not-allowed; }
+  .auth-switch { text-align: center; margin-top: 20px; font-size: 14px; color: #888; }
+  .auth-switch a { color: var(--green); cursor: pointer; font-weight: 500; text-decoration: none; }
+  .auth-switch a:hover { text-decoration: underline; }
+  .msg { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: none; }
+  .msg.error { background: #fdeaea; color: var(--red); border: 1px solid #f5c6c6; display: block; }
+  .msg.success { background: #eafde8; color: var(--green-dark); border: 1px solid #c6f0c6; display: block; }
+
+  /* MAIN APP */
+  .app { display: none; min-height: 100vh; }
+  .app.active { display: flex; flex-direction: column; }
+
+  /* NAVBAR */
+  .navbar { background: var(--black); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .navbar-brand { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: white; display: flex; align-items: center; gap: 10px; }
+  .navbar-brand span { color: var(--green-light); }
+  .navbar-right { display: flex; align-items: center; gap: 16px; }
+  .user-badge { background: var(--green-dark); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; text-transform: capitalize; }
+  .navbar-user { color: #ccc; font-size: 13px; }
+  .btn-logout { background: transparent; border: 1px solid #555; color: #ccc; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-family: 'Outfit', sans-serif; transition: all 0.2s; }
+  .btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+  /* LAYOUT */
+  .app-body { display: flex; flex: 1; }
+  .sidebar { width: 220px; background: var(--dark); min-height: calc(100vh - 60px); padding: 20px 0; flex-shrink: 0; }
+  .sidebar-nav { list-style: none; }
+  .sidebar-nav li a { display: flex; align-items: center; gap: 10px; padding: 11px 20px; color: #aaa; text-decoration: none; font-size: 14px; transition: all 0.2s; cursor: pointer; }
+  .sidebar-nav li a:hover, .sidebar-nav li a.active { background: rgba(45,122,45,0.2); color: var(--green-light); border-left: 3px solid var(--green-light); }
+  .sidebar-nav li a .icon { font-size: 16px; width: 20px; }
+  .main-content { flex: 1; padding: 28px; overflow-y: auto; }
+
+  /* PANELS */
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .panel-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--black); margin-bottom: 6px; }
+  .panel-sub { font-size: 14px; color: #888; margin-bottom: 24px; }
+
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .stat-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .stat-number { font-size: 32px; font-weight: 700; color: var(--black); }
+  .stat-label { font-size: 12px; color: #888; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-card.green .stat-number { color: var(--green); }
+  .stat-card.orange .stat-number { color: var(--orange); }
+  .stat-card.blue .stat-number { color: var(--blue); }
+  .stat-card.red .stat-number { color: var(--red); }
+
+  /* TABLES */
+  .table-card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 24px; }
+  .table-header { padding: 16px 20px; border-bottom: 1px solid var(--gray2); display: flex; align-items: center; justify-content: space-between; }
+  .table-header h3 { font-size: 15px; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: var(--gray); padding: 10px 16px; text-align: left; font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--gray2); font-size: 13px; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafafa; }
+
+  /* BADGES */
+  .badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: capitalize; }
+  .badge-pending { background: #fff3cd; color: #856404; }
+  .badge-active { background: #d1ecf1; color: #0c5460; }
+  .badge-completed { background: #d4edda; color: #155724; }
+  .badge-cancelled { background: #f8d7da; color: #721c24; }
+  .badge-admin { background: #e8d5f5; color: #5b2c8d; }
+  .badge-staff { background: #d1ecf1; color: #0c5460; }
+  .badge-client { background: #d4edda; color: #155724; }
+
+  /* ACTION BUTTONS */
+  .btn-sm { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; border: none; font-family: 'Outfit', sans-serif; transition: all 0.2s; }
+  .btn-approve { background: var(--green); color: white; }
+  .btn-approve:hover { background: var(--green-dark); }
+  .btn-reject { background: var(--red); color: white; }
+  .btn-reject:hover { background: #922b21; }
+  .btn-assign { background: var(--blue); color: white; }
+  .btn-assign:hover { background: #1f6fa8; }
+  .btn-complete { background: var(--green); color: white; }
+  .btn-complete:hover { background: var(--green-dark); }
+
+  /* BOOKING FORM */
+  .form-card { background: white; border-radius: 12px; padding: 28px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); max-width: 600px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group textarea { width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray2); border-radius: 8px; font-size: 14px; font-family: 'Outfit', sans-serif; outline: none; resize: vertical; min-height: 80px; }
+  .form-group textarea:focus { border-color: var(--green); }
+  .btn-submit { background: var(--green); color: white; border: none; padding: 13px 28px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'Outfit', sans-serif; transition: all 0.2s; }
+  .btn-submit:hover { background: var(--green-dark); }
+  .btn-submit:disabled { background: #aaa; cursor: not-allowed; }
+
+  /* STATUS TRACKER */
+  .status-tracker { display: flex; align-items: center; gap: 0; margin: 16px 0; }
+  .step { flex: 1; text-align: center; position: relative; }
+  .step-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--gray2); border: 2px solid #ddd; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; position: relative; z-index: 1; }
+  .step.done .step-dot { background: var(--green); border-color: var(--green); color: white; }
+  .step.current .step-dot { background: var(--orange); border-color: var(--orange); color: white; }
+  .step-label { font-size: 11px; color: #888; }
+  .step.done .step-label { color: var(--green); }
+  .step-line { position: absolute; top: 14px; left: 50%; width: 100%; height: 2px; background: var(--gray2); z-index: 0; }
+  .step.done .step-line { background: var(--green); }
+
+  /* EMPTY STATE */
+  .empty { text-align: center; padding: 48px 20px; color: #aaa; }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty p { font-size: 14px; }
+
+  /* LOADING */
+  .loading { text-align: center; padding: 32px; color: #888; font-size: 14px; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center; }
+  .modal-overlay.active { display: flex; }
+  .modal { background: white; border-radius: 12px; padding: 28px; width: 90%; max-width: 400px; }
+  .modal h3 { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+  .btn-cancel { background: var(--gray2); color: var(--text); border: none; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-family: 'Outfit', sans-serif; font-size: 13px; }
+
+  /* NOTIFICATIONS */
+  .notif-item { padding: 12px 16px; border-bottom: 1px solid var(--gray2); font-size: 13px; }
+  .notif-item.unread { background: #f0f8f0; border-left: 3px solid var(--green); }
+  .notif-time { font-size: 11px; color: #aaa; margin-top: 4px; }
+
+  /* SEARCH */
+  .search-bar { padding: 8px 14px; border: 1.5px solid var(--gray2); border-radius: 8px; font-size: 13px; font-family: 'Outfit', sans-serif; outline: none; width: 200px; }
+  .search-bar:focus { border-color: var(--green); }
+
+  /* PROFILE */
+  .profile-card { background: white; border-radius: 12px; padding: 28px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); max-width: 500px; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .form-row { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="auth-screen active" id="loginScreen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <h1>Typhi <span style="color:var(--green)">Solution</span></h1>
+      <p>Cleaning Services</p>
+    </div>
+    <div class="auth-title">Welcome back</div>
+    <div class="auth-subtitle">Sign in to your account</div>
+    <div class="msg" id="loginMsg"></div>
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="loginEmail" placeholder="you@example.com">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="••••••••">
+    </div>
+    <button class="btn btn-green" id="loginBtn" onclick="handleLogin()">Sign In</button>
+    <div class="auth-switch">Don't have an account? <a onclick="showScreen('register')">Register here</a></div>
+  </div>
+</div>
+
+<!-- REGISTER SCREEN -->
+<div class="auth-screen" id="registerScreen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <h1>Typhi <span style="color:var(--green)">Solution</span></h1>
+      <p>Cleaning Services</p>
+    </div>
+    <div class="auth-title">Create Account</div>
+    <div class="auth-subtitle">Join us today — it's free</div>
+    <div class="msg" id="registerMsg"></div>
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" id="regName" placeholder="John Doe">
+    </div>
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="regEmail" placeholder="you@example.com">
+    </div>
+    <div class="form-group">
+      <label>Phone Number</label>
+      <input type="tel" id="regPhone" placeholder="+254 700 000 000">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="regPassword" placeholder="At least 6 characters">
+    </div>
+    <button class="btn btn-green" id="registerBtn" onclick="handleRegister()">Create Account</button>
+    <div class="auth-switch">Already have an account? <a onclick="showScreen('login')">Sign in</a></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app" id="mainApp">
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar-brand">Typhi <span>Solution</span></div>
+    <div class="navbar-right">
+      <span class="user-badge" id="userRoleBadge">client</span>
+      <span class="navbar-user" id="navUserName">Loading...</span>
+      <button class="btn-logout" onclick="handleLogout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="app-body">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <ul class="sidebar-nav" id="sidebarNav"></ul>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+      <!-- OVERVIEW PANEL -->
+      <div class="panel" id="panel-overview">
+        <div class="panel-title">Dashboard Overview</div>
+        <div class="panel-sub" id="overviewSub">Welcome back!</div>
+        <div class="stats-grid" id="statsGrid"></div>
+        <div id="overviewExtra"></div>
+      </div>
+
+      <!-- BOOK SERVICE (CLIENT) -->
+      <div class="panel" id="panel-book">
+        <div class="panel-title">Book a Service</div>
+        <div class="panel-sub">Schedule a cleaning service</div>
+        <div class="form-card">
+          <div class="msg" id="bookMsg"></div>
+          <div class="form-group">
+            <label>Service Type</label>
+            <select id="bookService">
+              <option value="">Select a service...</option>
+              <option>Residential Cleaning</option>
+              <option>Office & Commercial Cleaning</option>
+              <option>Institutional Cleaning</option>
+              <option>Specialized Cleaning</option>
+              <option>Outdoor Cleaning</option>
+              <option>Event Cleaning</option>
+              <option>Cleaning Supervision</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Preferred Date</label>
+              <input type="date" id="bookDate">
+            </div>
+            <div class="form-group">
+              <label>Preferred Time</label>
+              <input type="time" id="bookTime">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Service Address</label>
+            <input type="text" id="bookAddress" placeholder="Enter full address">
+          </div>
+          <div class="form-group">
+            <label>Additional Notes</label>
+            <textarea id="bookNotes" placeholder="Any special instructions..."></textarea>
+          </div>
+          <button class="btn-submit" id="bookBtn" onclick="submitBooking()">Submit Booking Request</button>
+        </div>
+      </div>
+
+      <!-- MY BOOKINGS (CLIENT) -->
+      <div class="panel" id="panel-mybookings">
+        <div class="panel-title">My Bookings</div>
+        <div class="panel-sub">Track your service requests</div>
+        <div id="myBookingsList"></div>
+      </div>
+
+      <!-- ALL BOOKINGS (ADMIN) -->
+      <div class="panel" id="panel-allbookings">
+        <div class="panel-title">All Bookings</div>
+        <div class="panel-sub">Manage all service requests</div>
+        <div class="table-card">
+          <div class="table-header">
+            <h3>Booking Requests</h3>
+            <input class="search-bar" placeholder="Search..." oninput="filterBookings(this.value)">
+          </div>
+          <div id="allBookingsTable"><div class="loading">Loading bookings...</div></div>
+        </div>
+      </div>
+
+      <!-- ALL USERS (ADMIN) -->
+      <div class="panel" id="panel-users">
+        <div class="panel-title">Registered Members</div>
+        <div class="panel-sub">All users who have registered on the platform</div>
+        <div class="table-card">
+          <div class="table-header">
+            <h3>Members List</h3>
+            <span id="usersCount" style="font-size:13px;color:#888;"></span>
+          </div>
+          <div id="usersTable"><div class="loading">Loading members...</div></div>
+        </div>
+      </div>
+
+      <!-- STAFF JOBS -->
+      <div class="panel" id="panel-jobs">
+        <div class="panel-title">My Assigned Jobs</div>
+        <div class="panel-sub">Jobs assigned to you</div>
+        <div id="jobsList"></div>
+      </div>
+
+      <!-- NOTIFICATIONS -->
+      <div class="panel" id="panel-notifications">
+        <div class="panel-title">Notifications</div>
+        <div class="panel-sub">Your recent alerts</div>
+        <div class="table-card" id="notifList"></div>
+      </div>
+
+      <!-- PROFILE -->
+      <div class="panel" id="panel-profile">
+        <div class="panel-title">My Profile</div>
+        <div class="panel-sub">Your account information</div>
+        <div class="profile-card">
+          <div class="msg" id="profileMsg"></div>
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="profileName">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="profileEmail" disabled style="background:#f5f5f5;">
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" id="profilePhone">
+          </div>
+          <div class="form-group">
+            <label>Address</label>
+            <input type="text" id="profileAddress">
+          </div>
+          <button class="btn-submit" onclick="updateProfile()">Save Changes</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ASSIGN MODAL -->
+<div class="modal-overlay" id="assignModal">
+  <div class="modal">
+    <h3>Assign to Staff</h3>
+    <div class="form-group">
+      <label>Select Staff Member</label>
+      <select id="staffSelect"><option value="">Loading staff...</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('assignModal')">Cancel</button>
+      <button class="btn btn-green" style="width:auto;padding:8px 20px;" onclick="confirmAssign()">Assign</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── SUPABASE INIT ───────────────────────────────────────────
+const SUPABASE_URL = 'https://aqmawhhiuumextwfuwlb.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxbWF3aGhpdXVtZXh0d2Z1d2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMjE0MTYsImV4cCI6MjA4ODg5NzQxNn0.4mgJAntNHSgoWqkvuFPhZ04UFS--zJYbISzG3WDQkHY';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let currentProfile = null;
+let assigningBookingId = null;
+let allBookingsData = [];
+
+// ─── AUTH FUNCTIONS ──────────────────────────────────────────
+function showScreen(screen) {
+  document.querySelectorAll('.auth-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('mainApp').classList.remove('active');
+  if (screen === 'login') document.getElementById('loginScreen').classList.add('active');
+  else if (screen === 'register') document.getElementById('registerScreen').classList.add('active');
+  else if (screen === 'app') document.getElementById('mainApp').classList.add('active');
+}
+
+async function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const btn = document.getElementById('loginBtn');
+  const msg = document.getElementById('loginMsg');
+  msg.className = 'msg';
+  if (!email || !password) { msg.className = 'msg error'; msg.textContent = 'Please fill in all fields.'; return; }
+  btn.disabled = true; btn.textContent = 'Signing in...';
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) { msg.className = 'msg error'; msg.textContent = error.message; btn.disabled = false; btn.textContent = 'Sign In'; return; }
+  await loadApp(data.user);
+}
+
+async function handleRegister() {
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const phone = document.getElementById('regPhone').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const btn = document.getElementById('registerBtn');
+  const msg = document.getElementById('registerMsg');
+  msg.className = 'msg';
+  if (!name || !email || !password) { msg.className = 'msg error'; msg.textContent = 'Please fill in all required fields.'; return; }
+  if (password.length < 6) { msg.className = 'msg error'; msg.textContent = 'Password must be at least 6 characters.'; return; }
+  btn.disabled = true; btn.textContent = 'Creating account...';
+  const { data, error } = await sb.auth.signUp({ email, password });
+  if (error) { msg.className = 'msg error'; msg.textContent = error.message; btn.disabled = false; btn.textContent = 'Create Account'; return; }
+  if (data.user) {
+    await sb.from('profiles').insert({ id: data.user.id, full_name: name, email, phone, role: 'client' });
+    // Notify admin
+    const { data: admins } = await sb.from('profiles').select('id').eq('role', 'admin');
+    if (admins) {
+      for (const admin of admins) {
+        await sb.from('notifications').insert({ user_id: admin.id, message: `New member registered: ${name} (${email})` });
+      }
+    }
+    msg.className = 'msg success'; msg.textContent = 'Account created! Please check your email to confirm, then sign in.';
+    btn.disabled = false; btn.textContent = 'Create Account';
+  }
+}
+
+async function handleLogout() {
+  await sb.auth.signOut();
+  currentUser = null; currentProfile = null;
+  showScreen('login');
+}
+
+// ─── LOAD APP ────────────────────────────────────────────────
+async function loadApp(user) {
+  currentUser = user;
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  currentProfile = profile;
+  document.getElementById('navUserName').textContent = profile?.full_name || user.email;
+  document.getElementById('userRoleBadge').textContent = profile?.role || 'client';
+  document.getElementById('userRoleBadge').className = `user-badge badge-${profile?.role || 'client'}`;
+  buildSidebar(profile?.role || 'client');
+  showScreen('app');
+  showPanel('overview');
+  loadOverview();
+}
+
+function buildSidebar(role) {
+  const nav = document.getElementById('sidebarNav');
+  let items = [];
+  if (role === 'admin') {
+    items = [
+      { id: 'overview', icon: '📊', label: 'Overview' },
+      { id: 'allbookings', icon: '📋', label: 'All Bookings' },
+      { id: 'users', icon: '👥', label: 'Members' },
+      { id: 'notifications', icon: '🔔', label: 'Notifications' },
+      { id: 'profile', icon: '👤', label: 'My Profile' },
+    ];
+  } else if (role === 'staff') {
+    items = [
+      { id: 'overview', icon: '📊', label: 'Overview' },
+      { id: 'jobs', icon: '🧹', label: 'My Jobs' },
+      { id: 'notifications', icon: '🔔', label: 'Notifications' },
+      { id: 'profile', icon: '👤', label: 'My Profile' },
+    ];
+  } else {
+    items = [
+      { id: 'overview', icon: '🏠', label: 'Overview' },
+      { id: 'book', icon: '➕', label: 'Book Service' },
+      { id: 'mybookings', icon: '📋', label: 'My Bookings' },
+      { id: 'notifications', icon: '🔔', label: 'Notifications' },
+      { id: 'profile', icon: '👤', label: 'My Profile' },
+    ];
+  }
+  nav.innerHTML = items.map(i => `<li><a onclick="showPanel('${i.id}')" id="nav-${i.id}"><span class="icon">${i.icon}</span>${i.label}</a></li>`).join('');
+}
+
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+  const panel = document.getElementById(`panel-${id}`);
+  const navItem = document.getElementById(`nav-${id}`);
+  if (panel) panel.classList.add('active');
+  if (navItem) navItem.classList.add('active');
+  if (id === 'allbookings') loadAllBookings();
+  if (id === 'users') loadUsers();
+  if (id === 'mybookings') loadMyBookings();
+  if (id === 'jobs') loadJobs();
+  if (id === 'notifications') loadNotifications();
+  if (id === 'profile') loadProfile();
+}
+
+// ─── OVERVIEW ────────────────────────────────────────────────
+async function loadOverview() {
+  const role = currentProfile?.role || 'client';
+  document.getElementById('overviewSub').textContent = `Welcome back, ${currentProfile?.full_name || ''}!`;
+  const grid = document.getElementById('statsGrid');
+  const extra = document.getElementById('overviewExtra');
+
+  if (role === 'admin') {
+    const [{ count: totalUsers }, { count: totalBookings }, { count: pending }, { count: completed }] = await Promise.all([
+      sb.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'client'),
+      sb.from('bookings').select('*', { count: 'exact', head: true }),
+      sb.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      sb.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'completed'),
+    ]);
+    grid.innerHTML = `
+      <div class="stat-card blue"><div class="stat-number">${totalUsers||0}</div><div class="stat-label">Registered Clients</div></div>
+      <div class="stat-card"><div class="stat-number">${totalBookings||0}</div><div class="stat-label">Total Bookings</div></div>
+      <div class="stat-card orange"><div class="stat-number">${pending||0}</div><div class="stat-label">Pending Approval</div></div>
+      <div class="stat-card green"><div class="stat-number">${completed||0}</div><div class="stat-label">Completed</div></div>
+    `;
+    // Recent registrations
+    const { data: recent } = await sb.from('profiles').select('*').eq('role','client').order('created_at', { ascending: false }).limit(5);
+    extra.innerHTML = `<div class="table-card"><div class="table-header"><h3>Recently Registered Members</h3></div><table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Joined</th></tr></thead><tbody>${(recent||[]).map(u=>`<tr><td>${u.full_name||'—'}</td><td>${u.email||'—'}</td><td>${u.phone||'—'}</td><td>${formatDate(u.created_at)}</td></tr>`).join('')}</tbody></table></div>`;
+
+  } else if (role === 'staff') {
+    const { count: assigned } = await sb.from('bookings').select('*', { count: 'exact', head: true }).eq('assigned_to', currentUser.id);
+    const { count: active } = await sb.from('bookings').select('*', { count: 'exact', head: true }).eq('assigned_to', currentUser.id).eq('status','active');
+    const { count: done } = await sb.from('bookings').select('*', { count: 'exact', head: true }).eq('assigned_to', currentUser.id).eq('status','completed');
+    grid.innerHTML = `
+      <div class="stat-card"><div class="stat-number">${assigned||0}</div><div class="stat-label">Total Assigned</div></div>
+      <div class="stat-card orange"><div class="stat-number">${active||0}</div><div class="stat-label">Active Jobs</div></div>
+      <div class="stat-card green"><div class="stat-number">${done||0}</div><div class="stat-label">Completed</div></div>
+    `;
+    extra.innerHTML = '';
+  } else {
+    const { count: total } = await sb.from('bookings').select('*', { count: 'exact', head: true }).eq('client_id', currentUser.id);
+    const { count: pending } = await sb.from('bookings').select('*', { count: 'exact', head: true }).eq('client_id', currentUser.id).eq('status','pending');
+    const { count: active } = await sb.from('bookings').select('*', { count: 'exact', head: true }).eq('client_id', currentUser.id).eq('status','active');
+    const { count: completed } = await sb.from('bookings').select('*', { count: 'exact', head: true }).eq('client_id', currentUser.id).eq('status','completed');
+    grid.innerHTML = `
+      <div class="stat-card"><div class="stat-number">${total||0}</div><div class="stat-label">Total Bookings</div></div>
+      <div class="stat-card orange"><div class="stat-number">${pending||0}</div><div class="stat-label">Pending</div></div>
+      <div class="stat-card blue"><div class="stat-number">${active||0}</div><div class="stat-label">Active</div></div>
+      <div class="stat-card green"><div class="stat-number">${completed||0}</div><div class="stat-label">Completed</div></div>
+    `;
+    extra.innerHTML = '';
+  }
+}
+
+// ─── BOOKING ─────────────────────────────────────────────────
+async function submitBooking() {
+  const service = document.getElementById('bookService').value;
+  const date = document.getElementById('bookDate').value;
+  const time = document.getElementById('bookTime').value;
+  const address = document.getElementById('bookAddress').value.trim();
+  const notes = document.getElementById('bookNotes').value.trim();
+  const btn = document.getElementById('bookBtn');
+  const msg = document.getElementById('bookMsg');
+  msg.className = 'msg';
+  if (!service || !date || !address) { msg.className = 'msg error'; msg.textContent = 'Please fill in service, date, and address.'; return; }
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  const { error } = await sb.from('bookings').insert({ client_id: currentUser.id, service, date, time, address, notes, status: 'pending' });
+  if (error) { msg.className = 'msg error'; msg.textContent = error.message; btn.disabled = false; btn.textContent = 'Submit Booking Request'; return; }
+  // Notify admins
+  const { data: admins } = await sb.from('profiles').select('id').eq('role','admin');
+  if (admins) {
+    for (const admin of admins) {
+      await sb.from('notifications').insert({ user_id: admin.id, message: `New booking request for "${service}" from ${currentProfile?.full_name}` });
+    }
+  }
+  msg.className = 'msg success'; msg.textContent = 'Booking submitted successfully! We will review and confirm shortly.';
+  document.getElementById('bookService').value = '';
+  document.getElementById('bookDate').value = '';
+  document.getElementById('bookTime').value = '';
+  document.getElementById('bookAddress').value = '';
+  document.getElementById('bookNotes').value = '';
+  btn.disabled = false; btn.textContent = 'Submit Booking Request';
+}
+
+// ─── MY BOOKINGS ─────────────────────────────────────────────
+async function loadMyBookings() {
+  const container = document.getElementById('myBookingsList');
+  container.innerHTML = '<div class="loading">Loading your bookings...</div>';
+  const { data, error } = await sb.from('bookings').select('*').eq('client_id', currentUser.id).order('created_at', { ascending: false });
+  if (!data || data.length === 0) { container.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>No bookings yet. Book your first service!</p></div>'; return; }
+  container.innerHTML = data.map(b => `
+    <div class="table-card" style="margin-bottom:16px;">
+      <div style="padding:16px 20px;">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px;">
+          <div>
+            <strong style="font-size:15px;">${b.service}</strong>
+            <div style="font-size:12px;color:#888;margin-top:2px;">${b.date} ${b.time ? '@ '+b.time : ''} • ${b.address}</div>
+          </div>
+          <span class="badge badge-${b.status}">${b.status}</span>
+        </div>
+        ${b.notes ? `<div style="font-size:13px;color:#666;margin-bottom:12px;">📝 ${b.notes}</div>` : ''}
+        <div class="status-tracker">
+          ${statusTracker(b.status)}
+        </div>
+        <div style="font-size:11px;color:#aaa;margin-top:8px;">Submitted: ${formatDate(b.created_at)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function statusTracker(status) {
+  const steps = ['pending','active','completed'];
+  const idx = steps.indexOf(status);
+  return steps.map((s, i) => `
+    <div class="step ${i < idx ? 'done' : i === idx ? 'current' : ''}">
+      <div class="step-dot">${i < idx ? '✓' : i+1}</div>
+      <div class="step-label">${s.charAt(0).toUpperCase()+s.slice(1)}</div>
+      ${i < steps.length-1 ? '<div class="step-line"></div>' : ''}
+    </div>
+  `).join('');
+}
+
+// ─── ALL BOOKINGS (ADMIN) ────────────────────────────────────
+async function loadAllBookings() {
+  const container = document.getElementById('allBookingsTable');
+  container.innerHTML = '<div class="loading">Loading...</div>';
+  const { data } = await sb.from('bookings').select('*, profiles!bookings_client_id_fkey(full_name, email, phone)').order('created_at', { ascending: false });
+  allBookingsData = data || [];
+  renderBookingsTable(allBookingsData);
+}
+
+function renderBookingsTable(data) {
+  const container = document.getElementById('allBookingsTable');
+  if (!data || data.length === 0) { container.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>No bookings yet.</p></div>'; return; }
+  container.innerHTML = `<table>
+    <thead><tr><th>Client</th><th>Service</th><th>Date</th><th>Address</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>${data.map(b => `
+      <tr>
+        <td><strong>${b.profiles?.full_name||'—'}</strong><br><span style="font-size:11px;color:#888;">${b.profiles?.email||''}</span></td>
+        <td>${b.service}</td>
+        <td>${b.date||'—'}</td>
+        <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;">${b.address||'—'}</td>
+        <td><span class="badge badge-${b.status}">${b.status}</span></td>
+        <td style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${b.status==='pending' ? `<button class="btn-sm btn-approve" onclick="updateBookingStatus('${b.id}','active')">Approve</button><button class="btn-sm btn-reject" onclick="updateBookingStatus('${b.id}','cancelled')">Reject</button>` : ''}
+          ${b.status==='active' ? `<button class="btn-sm btn-assign" onclick="openAssign('${b.id}')">Assign</button><button class="btn-sm btn-complete" onclick="updateBookingStatus('${b.id}','completed')">Complete</button>` : ''}
+          ${b.status==='completed'||b.status==='cancelled' ? '<span style="color:#aaa;font-size:12px;">Done</span>' : ''}
+        </td>
+      </tr>`).join('')}
+    </tbody></table>`;
+}
+
+function filterBookings(q) {
+  const filtered = allBookingsData.filter(b =>
+    (b.profiles?.full_name||'').toLowerCase().includes(q.toLowerCase()) ||
+    (b.service||'').toLowerCase().includes(q.toLowerCase()) ||
+    (b.status||'').toLowerCase().includes(q.toLowerCase())
+  );
+  renderBookingsTable(filtered);
+}
+
+async function updateBookingStatus(id, status) {
+  await sb.from('bookings').update({ status }).eq('id', id);
+  const booking = allBookingsData.find(b => b.id === id);
+  if (booking) {
+    await sb.from('notifications').insert({ user_id: booking.client_id, message: `Your booking for "${booking.service}" has been ${status}.` });
+  }
+  loadAllBookings();
+  loadOverview();
+}
+
+// ─── ASSIGN STAFF ────────────────────────────────────────────
+async function openAssign(bookingId) {
+  assigningBookingId = bookingId;
+  const { data: staff } = await sb.from('profiles').select('id, full_name').eq('role','staff');
+  const sel = document.getElementById('staffSelect');
+  if (!staff || staff.length === 0) { sel.innerHTML = '<option>No staff members found</option>'; }
+  else { sel.innerHTML = staff.map(s => `<option value="${s.id}">${s.full_name}</option>`).join(''); }
+  document.getElementById('assignModal').classList.add('active');
+}
+
+async function confirmAssign() {
+  const staffId = document.getElementById('staffSelect').value;
+  if (!staffId || !assigningBookingId) return;
+  await sb.from('bookings').update({ assigned_to: staffId }).eq('id', assigningBookingId);
+  const booking = allBookingsData.find(b => b.id === assigningBookingId);
+  await sb.from('notifications').insert({ user_id: staffId, message: `You have been assigned a new job: "${booking?.service||'Cleaning service'}"` });
+  closeModal('assignModal');
+  loadAllBookings();
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// ─── USERS (ADMIN) ───────────────────────────────────────────
+async function loadUsers() {
+  const container = document.getElementById('usersTable');
+  container.innerHTML = '<div class="loading">Loading members...</div>';
+  const { data } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+  document.getElementById('usersCount').textContent = `${data?.length || 0} total members`;
+  if (!data || data.length === 0) { container.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><p>No members yet.</p></div>'; return; }
+  container.innerHTML = `<table>
+    <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Joined</th></tr></thead>
+    <tbody>${data.map(u => `
+      <tr>
+        <td><strong>${u.full_name||'—'}</strong></td>
+        <td>${u.email||'—'}</td>
+        <td>${u.phone||'—'}</td>
+        <td><span class="badge badge-${u.role}">${u.role}</span></td>
+        <td>${formatDate(u.created_at)}</td>
+      </tr>`).join('')}
+    </tbody></table>`;
+}
+
+// ─── STAFF JOBS ───────────────────────────────────────────────
+async function loadJobs() {
+  const container = document.getElementById('jobsList');
+  container.innerHTML = '<div class="loading">Loading jobs...</div>';
+  const { data } = await sb.from('bookings').select('*, profiles!bookings_client_id_fkey(full_name, phone)').eq('assigned_to', currentUser.id).order('created_at', { ascending: false });
+  if (!data || data.length === 0) { container.innerHTML = '<div class="empty"><div class="empty-icon">🧹</div><p>No jobs assigned to you yet.</p></div>'; return; }
+  container.innerHTML = data.map(b => `
+    <div class="table-card" style="margin-bottom:16px;">
+      <div style="padding:16px 20px;">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
+          <div>
+            <strong style="font-size:15px;">${b.service}</strong>
+            <div style="font-size:12px;color:#888;margin-top:2px;">Client: ${b.profiles?.full_name||'—'} • ${b.profiles?.phone||''}</div>
+            <div style="font-size:12px;color:#888;">${b.date||''} ${b.time ? '@ '+b.time : ''}</div>
+            <div style="font-size:12px;color:#555;margin-top:2px;">📍 ${b.address||'—'}</div>
+          </div>
+          <span class="badge badge-${b.status}">${b.status}</span>
+        </div>
+        ${b.notes ? `<div style="font-size:13px;color:#666;margin:8px 0;">📝 ${b.notes}</div>` : ''}
+        <div style="margin-top:10px;display:flex;gap:8px;">
+          ${b.status==='active' ? `<button class="btn-sm btn-complete" onclick="completeJob('${b.id}')">✓ Mark Complete</button>` : ''}
+          ${b.status==='completed' ? '<span style="color:var(--green);font-size:13px;">✓ Completed</span>' : ''}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function completeJob(id) {
+  const { data: booking } = await sb.from('bookings').select('*').eq('id', id).single();
+  await sb.from('bookings').update({ status: 'completed' }).eq('id', id);
+  if (booking) {
+    await sb.from('notifications').insert({ user_id: booking.client_id, message: `Your "${booking.service}" service has been completed! Thank you for choosing Typhi Solution.` });
+  }
+  loadJobs();
+  loadOverview();
+}
+
+// ─── NOTIFICATIONS ────────────────────────────────────────────
+async function loadNotifications() {
+  const container = document.getElementById('notifList');
+  const { data } = await sb.from('notifications').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+  if (!data || data.length === 0) { container.innerHTML = '<div class="empty"><div class="empty-icon">🔔</div><p>No notifications yet.</p></div>'; return; }
+  container.innerHTML = data.map(n => `
+    <div class="notif-item ${n.is_read ? '' : 'unread'}">
+      <div>${n.message}</div>
+      <div class="notif-time">${formatDate(n.created_at)}</div>
+    </div>
+  `).join('');
+  // Mark all as read
+  await sb.from('notifications').update({ is_read: true }).eq('user_id', currentUser.id);
+}
+
+// ─── PROFILE ──────────────────────────────────────────────────
+async function loadProfile() {
+  if (!currentProfile) return;
+  document.getElementById('profileName').value = currentProfile.full_name || '';
+  document.getElementById('profileEmail').value = currentProfile.email || '';
+  document.getElementById('profilePhone').value = currentProfile.phone || '';
+  document.getElementById('profileAddress').value = currentProfile.address || '';
+}
+
+async function updateProfile() {
+  const name = document.getElementById('profileName').value.trim();
+  const phone = document.getElementById('profilePhone').value.trim();
+  const address = document.getElementById('profileAddress').value.trim();
+  const msg = document.getElementById('profileMsg');
+  const { error } = await sb.from('profiles').update({ full_name: name, phone, address }).eq('id', currentUser.id);
+  if (error) { msg.className = 'msg error'; msg.textContent = error.message; return; }
+  currentProfile = { ...currentProfile, full_name: name, phone, address };
+  document.getElementById('navUserName').textContent = name;
+  msg.className = 'msg success'; msg.textContent = 'Profile updated successfully!';
+  setTimeout(() => { msg.className = 'msg'; }, 3000);
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────
+function formatDate(str) {
+  if (!str) return '—';
+  return new Date(str).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+// ─── INIT ─────────────────────────────────────────────────────
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) { await loadApp(session.user); }
+  else { showScreen('login'); }
+})();
+</script>
+</body>
+</html>
